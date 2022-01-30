@@ -435,14 +435,17 @@ Move CreatePromotion(Square from, Square to, Piece promo);
 Move CreateEnPassant(Square from, Square to);
 // Create castle move
 Move CreateCastle(Square from, Square to);
+// Promote pieces
+const Piece promote_pieces[] = { KNIGHT, BISHOP, ROOK, QUEEN };
 
 /* UCI and string operations*/
 const std::string piece_strings[6] = { "n", "b", "r", "q", "k", "p" };
 std::string PieceStringLower(Piece piece); 
 std::string SquareName(Square sqr);
+Bitboard BitboardFromString(std::string str);
 
 /* struct: MoveList */
-struct Moves
+struct MoveList
 {
 	Move moves[256];
 };
@@ -454,8 +457,8 @@ public:
 	State() = default;
 	State(std::string /* fen */);
 	void Apply(Move);
+	bool GetTurn() const { return turn; }
 
-private:
 	Bitboard	bbs[13];
 	uint8_t		c50;
 	uint8_t		castle;
@@ -464,4 +467,4 @@ private:
 };
 
 /* Move generation */
-//Move* generate_moves(const State&, Move*);
+Move* generate_moves(const State&, Move*);

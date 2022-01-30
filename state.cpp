@@ -131,23 +131,121 @@ std::string SquareName(Square sqr)
 }
 std::string PieceStringLower(Piece piece) { return piece_strings[piece]; }
 
-/* class: State */
-State::State(std::string fen) {
+Bitboard BitboardFromString(std::string str)
+{
+	if (str[0] < 'a' || str[1] < '1' || str[0] > 'h' || str[1] > '8')
+		throw std::runtime_error("Square string is formatted improperly.");
+	uint64_t boardnum = str[0] - 'a' + 8 * (str[1] - '1');
+	return Bitboard(1ULL << boardnum);
+}
 
+/* class: State */
+State::State(std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") {
+
+	const std::string castle_str = "QKqk";
+
+	std::string strings[6];
+	std::istringstream f(fen);
+	std::string s;
+	int strCount = 0;
+	while (std::getline(f, s, ' ')) {
+		strings[strCount] = s;
+		strCount++;
+		if (strCount == 6) break;
+	}
+	
+	if (strCount != 6)
+		throw std::runtime_error( "Bad FEN" );
+	
+	auto posstring		= strings[0];
+	auto colour_string	= strings[1];
+	auto castlestring	= strings[2];
+	auto epstring		= strings[3];
+	auto fiftycounter	= strings[4];
+	auto moveclock		= strings[5];
+
+	auto ite = 8;
+	size_t sub_ite, found;
+
+	std::istringstream f2(posstring);
+	while (std::getline(f2, s, '/')) {
+		sub_ite = 0;
+		for (char& c : s) {
+			if (c >= '1' && c <= '9')
+			{
+				sub_ite += c - '0';
+			}
+			else
+			{
+				const std::string piece_strings = "NBRQKP";
+				found = piece_strings.find(::toupper(c));
+				if (found == std::string::npos)
+					throw std::runtime_error("Bad FEN");
+				auto piece = static_cast<Piece>(found);
+				auto this_piece_colour = (::toupper(c) != c);
+				auto square = static_cast<Square>(8 * (ite - 1) + sub_ite);
+				uint8_t pid = this_piece_colour*NUMBER_PIECES + piece;
+				bbs[pid] = OnBit( bbs[pid], square );
+				sub_ite++;
+			}
+		}
+		if (sub_ite != 8)
+			throw std::runtime_error( "Bad FEN" );
+		
+		ite -= 1;
+	}
+
+	if (ite != 0)
+		throw std::runtime_error( "Bad FEN" );
+
+	if (castlestring != "-") {
+		uint8_t castlesum = 0;
+		for (char c : castlestring) {
+			found = castle_str.find(c);
+			if (found != std::string::npos)
+				castlesum += 1 << found;
+		}
+		castle = castlesum;
+	}
+	else
+		castle = 0;
+	
+	// 0 for w, 1 for b.
+	turn = (colour_string != "w");
+	
+	if (epstring != "-")
+		bbs[13] = BitboardFromString(epstring);
+	else
+		bbs[13] = 0;
+	
+	if ( fiftycounter != "-" ) {
+		uint8_t counter = std::stoi(fiftycounter);
+		if ( counter >= 999 )
+			throw std::runtime_error( "Bad FEN" );
+		c50 = counter;
+	}
+	else
+		c50 = 0;
+	
+	if (moveclock != "-") {
+		unsigned short counter = (std::stoi(moveclock) - 1);
+		if ( counter > 999 )
+			throw std::runtime_error("Bad FEN");
+		plies = 2 * counter + turn;
+	}
 }
 
 void State::Apply(Move move) {
 	auto specl = SpecialMoveType(move);
 	bool new50 = false;
-	bool white = 0;
-	bool other = !white;
+	bool other = !turn;
 	auto start = GetFrom(move);
 	auto finish = GetTo(move);
 
-	const uint8_t ip	= NUMBER_PIECES * white + PAWN;
+	const uint8_t ip	= NUMBER_PIECES * turn + PAWN;
 	const uint8_t ip2	= NUMBER_PIECES * other + PAWN;
-	const uint8_t ik	= NUMBER_PIECES * white + KING;
-	const uint8_t rk	= NUMBER_PIECES * white + ROOK;
+	const uint8_t ik	= NUMBER_PIECES * turn + KING;
+	const uint8_t rk	= NUMBER_PIECES * turn + ROOK;
 
 	/* Removing captured pieces of opposition */
 	uint8_t i_other;
@@ -168,17 +266,17 @@ void State::Apply(Move move) {
 	int i, p;
 	Bitboard pbb;
 	for (p = 0; p < NUMBER_PIECES; p++) {
-		i = NUMBER_PIECES * white + p;
+		i = NUMBER_PIECES * turn + p;
 		pbb = bbs[i];
 		if (IsOn(pbb, start)) {
 			new50 = (p == PAWN);
 			if (p == PAWN && abs(finish - start) > 15) {
-				bbs[12] = Bitboard(1ULL << (white ? (finish - 8) : (start - 8)));
+				bbs[12] = Bitboard(1ULL << (turn ? (finish - 8) : (start - 8)));
 			}
 			else { bbs[12] = 0; }
 
 			if (p == KING) {
-				castle = castle & ~(white ? (WQ + WK) : (BQ + WK));
+				castle = castle & ~(turn ? (WQ + WK) : (BQ + WK));
 			}
 			else if (p == ROOK) {
 				if (start == a1) castle &= ~WQ;
@@ -198,7 +296,7 @@ void State::Apply(Move move) {
 	/* En passant capture */
 	if(specl==ENPASSANT) {
 		new50 = true;
-		auto passantp = white ? (bbs[12] >> 8) : (bbs[12] << 8);
+		auto passantp = turn ? (bbs[12] >> 8) : (bbs[12] << 8);
 		bbs[ip] = bbs[ip] | bbs[12];
 		bbs[ip2] = bbs[ip2] & ~passantp;
 	}
@@ -206,7 +304,7 @@ void State::Apply(Move move) {
 	if (specl == PROMOTE) {
 		new50 = true;
 		auto prom = PromotionPiece(move);
-		const uint8_t i_prom = NUMBER_PIECES*white + prom;
+		const uint8_t i_prom = NUMBER_PIECES*turn + prom;
 		auto our_promote_pieces = 
 		bbs[i_prom] = OnBit( bbs[i_prom], finish);
 	}
@@ -217,13 +315,101 @@ void State::Apply(Move move) {
 		auto s1 = Square(qs ? finish - 2 : finish + 1);
 		auto s2 = Square(qs ? finish + 1 : finish - 1);
 		bbs[rk] = BitMove( bbs[rk], s1, s2 );
-		castle = castle & ~(white ? (WQ + WK) : (BQ + WK));
+		castle = castle & ~(turn ? (WQ + WK) : (BQ + WK));
 	}
 	c50 = new50 ? 0 : c50++;
 }
 
 /* Move generation */
-/*
 Move* generate_moves(const State& state, Move* moves) {
+
+	/* Offset for bitboards */
+	const uint8_t nn = state.turn * NUMBER_PIECES;
+
+	// All occupants of the state.
+	Bitboard occ = 0;
+	Bitboard occ_b = 0;
+	Bitboard occ_w = 0;
+	for (int i = 0; i < 12; i++)
+	{
+		auto tmp = state.bbs[i];
+		occ = occ | tmp;
+		if (i < 6)
+			occ_w = occ_w | tmp;
+		else
+			occ_b = occ_b | tmp;
+	};
+	
+	/* Pawn moves */
+	const uint8_t ip = nn + PAWN;
+	auto bb_pawn = state.bbs[ip];
+	for (auto it = bb_pawn.begin(); it != bb_pawn.end(); it.operator++()) {
+		auto sqr = Square(*it);
+		int rank = sqr / 8;
+		Bitboard square = squares[sqr];
+		// Pushes
+		Bitboard push_once = square << 8;
+		if (!(push_once & occ))
+		{
+			// 2nd rank, double push.
+			if (rank == 1)
+			{
+				Bitboard push_twice = square << 16;
+				if (!(push_twice & occ))
+					*moves++ = CreateMove(sqr, Square(sqr + 16));
+			}
+			// 7th rank, promotion
+			if (rank == 6) 
+				for (auto& prom : promote_pieces)
+					*moves++ = CreatePromotion(sqr, Square(sqr + 8), prom);
+			else
+				*moves++ = CreateMove(sqr, Square(sqr + 8));
+		}
+	
+		if (pawn_attacks[sqr] & (occ_b | state.bbs[13]))
+		for (int shft : {7, 9})
+		{
+			// You cannot capture off the side of the board.
+			uint8_t file = sqr % 8;
+			if (file == 0 && shft == 7)
+				continue;
+			if (file == 7 && shft == 9)
+				continue;
+
+			Bitboard capt_diag = square << shft;
+			Square to = Square(sqr + shft);
+			if (capt_diag & (occ_b | state.bbs[13]))
+			{
+				if (rank == 6) // 7th rank, promotion
+					for (auto& prom : promote_pieces)
+						*moves++ = CreatePromotion(sqr, to, prom);
+				else
+				{
+					// Taking enpassant
+					if (pawn_attacks[sqr] & state.bbs[13])
+						*moves++ = CreateEnPassant(sqr, to);
+					else
+						*moves++ = CreateMove(sqr, to);
+				}
+			}
+		}
+	}
+
+	/* Knight */
+	const uint8_t in = nn + KNIGHT;
+	auto bb_knight = state.bbs[in];
+
+	/* Bishop */
+	const uint8_t ib = nn + BISHOP;
+	auto bb_bishop = state.bbs[ib];
+
+	/* Rook */
+	const uint8_t ir = nn + ROOK;
+	auto bb_rook = state.bbs[ir];
+
+	/* King */
+	const uint8_t ik = nn + KING;
+	auto bb_king = state.bbs[ik];
+
+	return moves;
 }
-*/
