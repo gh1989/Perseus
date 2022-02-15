@@ -1,5 +1,6 @@
 #pragma once
 #include "state.h"
+#include <iostream>
 #include <sstream>
 
 /* Bitboard functions */
@@ -412,4 +413,75 @@ Move* generate_moves(const State& state, Move* moves) {
 	auto bb_king = state.bbs[ik];
 
 	return moves;
+}
+
+void PrettyPrint(const State& state)
+{
+	// collect information
+	std::string pos[8][8];
+	for (int i = 0; i < 8; i++)
+		for (int j = 0; j < 8; j++)
+			pos[i][j] = ' ';
+
+	const std::string PIECE_STRINGS = "NBRQKP";
+	const std::string piece_strings = "nbrqkp";
+
+	for (int i = 0; i < NUMBER_PIECES; ++i)
+	{
+		Bitboard wocc = state.bbs[i];
+		Bitboard bocc = state.bbs[NUMBER_PIECES+i];
+		Piece piece = static_cast<Piece>(i);
+		for (int i = 0; i < 64; i++)
+		{
+			int j = (7 - int(i / 8)) % 8;
+			int k = i % 8;
+			if (wocc & squares[i])
+				pos[j][k] = PIECE_STRINGS[piece];
+			if (bocc & squares[i])
+				pos[j][k] = piece_strings[piece];
+		}
+	}
+	
+	// print out the board
+	std::string baseline = "+---";
+	for (auto j = 0; j < 7; j++)
+		baseline += "+---";
+	baseline += "+\n";
+
+	std::string output = baseline;
+	for (auto i = 0; i < 8; i++)
+	{
+		for (auto j = 0; j < 8; j++)
+			output += "| " + pos[i][j] + " ";
+		output += "|\n";
+		output += baseline;
+	}
+
+	std::cout << output;
+	Bitboard ep = state.bbs[13];
+
+	if (ep)
+	{
+		std::cout << "en-passant: ";
+		for (int i = 0; i < 63; i++)
+		{
+			if (squares[i] & ep)
+				std::cout << SquareName(Square(i));
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "fiftycounter: " << state.c50 << std::endl;
+	int castlerights = state.castle;
+	const std::string crights = "QKqk";
+	std::cout << "castlerights: " << castlerights << " ";
+	for (char c : crights)
+	{
+		if (castlerights % 2)
+			std::cout << c;
+		castlerights /= 2;
+	}
+
+	std::cout << std::endl;
+	std::cout << "plies: " << state.plies << std::endl;
+	std::cout << "colour to move: " << (state.turn ? "white" : "black") << std::endl;
 }
