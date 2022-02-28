@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <intrin.h>
+#include <iterator>     // std::end
+#include <algorithm> 
 #include <map>
 
 /* 	class: BitIterator */
@@ -486,7 +488,121 @@ public:
 };
 
 /* Move generation */
-Move* generate_moves(const State&, Move*);
+void GenerateMoves(const State&, Move*);
+void LegalSliderMoves(const State&, Move*);
+void LegalJumperMoves(const State&, Move*);
 
 /* Debugging, printing out */
 void PrettyPrint(const State& state);
+
+std::uint64_t hash_combine(uint64_t lhs, uint64_t rhs);
+
+template<class InputIt, class T, class BinaryOperation>
+constexpr // since C++20
+T accumulate(InputIt first, InputIt last, T init,
+	BinaryOperation op)
+{
+	for (; first != last; ++first) {
+		init = op(std::move(init), *first); // std::move since C++20
+	}
+	return init;
+}
+
+struct StateHash
+{
+	std::uint64_t operator()(State const& s) const noexcept
+	{
+		auto hsh = accumulate<>(s.bbs, std::end(s.bbs), 0, hash_combine);
+		return hsh;
+	}
+};
+
+
+// Directions the rook can move
+static const std::pair<int, int> rook_directions[4] =
+{
+	{1, 0}, {-1, 0}, {0, 1}, {0, -1}
+};
+// Directions the bishop can move
+static const std::pair<int, int> bishop_directions[4] =
+{
+	{1, 1}, {-1, 1}, {1, -1}, {-1, -1}
+};
+
+inline void LegalJumperMoves(
+	const State& s,
+	Move* moves,
+	Piece p,
+	const Bitboard* attacks,
+	Bitboard current_occupation )
+{
+	Bitboard piecebb = s.bbs[s.turn * NUMBER_PIECES + p ];
+
+	for (auto it = piecebb.begin(); it != piecebb.end(); it.operator++())
+	{
+		Square sqr = Square(*it);
+		;			Bitboard square = squares[sqr];
+		auto attack = attacks[sqr] & (~current_occupation);
+		for (auto it2 = attack.begin(); it2 != attack.end(); it2.operator++())
+		{
+			Square sqr2 = Square(*it2);
+			auto move = CreateMove(Square(sqr), Square(sqr2));
+			*moves++ = move;
+		}
+	}
+}
+
+inline void LegalSliderMoves(
+	const State& s,
+	Move* moves,
+	Piece p,
+	const std::pair<int, int>* directions,
+	Bitboard current_occupation, 
+	Bitboard other_occupation )
+{
+	Bitboard piecebb = s.bbs[s.turn * NUMBER_PIECES + p];
+
+	for (auto it = piecebb.begin(); it != piecebb.end(); it.operator++())
+	{
+		Square sqr = Square(*it);
+		Bitboard square = squares[sqr];
+
+		for (int i = 0; i < 4; i++)
+		{
+			auto dir = directions[i];
+			int sidx = sqr;
+			while (true)
+			{
+				int rank = sidx / 8;
+				if (dir.first > 0 && rank == 7)
+					break;
+				if (dir.first < 0 && rank == 0)
+					break;
+				int file = sidx % 8;
+				if (dir.second > 0 && file == 7)
+					break;
+				if (dir.second < 0 && file == 0)
+					break;
+
+				sidx += 8 * dir.first + dir.second;
+				if (sidx > 63 | sidx < 0)
+					break;
+				Bitboard new_bb = squares[sidx];
+				// slider hits own piece
+				if (new_bb&current_occupation)
+					break;
+				auto sqrto = Square(sidx);
+				// Skip non-captures.
+				/*
+				if (MT == Capture && !(theirs & squares[sidx]))
+					continue;
+				*/
+				*moves++ = CreateMove(sqr, sqrto);
+
+				// slider hits opposition 
+				if (new_bb&other_occupation)
+					break;
+			}
+		}
+	}
+}

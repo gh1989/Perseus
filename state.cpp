@@ -1,5 +1,6 @@
 #pragma once
 #include "state.h"
+#include <functional>
 #include <iostream>
 #include <sstream>
 
@@ -285,14 +286,14 @@ void State::Apply(Move move) {
 				else if (start == a8) castle &= ~BQ;
 				else if (start == h8) castle &= ~BK;
 			}
-			bbs[i] = OffBit(pbb, start);
+			bbs[i] = OffBit(bbs[i], start);
 			break;
 		}
 	}
 	
 	/* Not special */
 	if (specl == NONE) {
-		bbs[i] = OnBit(pbb, finish);
+		bbs[i] = OnBit(bbs[i], finish);
 	}
 	/* En passant capture */
 	if(specl==ENPASSANT) {
@@ -322,7 +323,7 @@ void State::Apply(Move move) {
 }
 
 /* Move generation */
-Move* generate_moves(const State& state, Move* moves) {
+void GenerateMoves(const State& state, Move* moves) {
 
 	/* Offset for bitboards */
 	const uint8_t nn = state.turn * NUMBER_PIECES;
@@ -340,54 +341,67 @@ Move* generate_moves(const State& state, Move* moves) {
 		else
 			occ_b = occ_b | tmp;
 	};
-	
-	/* Pawn moves */
+	auto occ_other = state.turn ? occ_w : occ_b;
+
+	/* Pawn moves: without rotation */
 	const uint8_t ip = nn + PAWN;
+	Bitboard square, push_once, push_twice, capt_diag;
+	int pawn_off_1 = state.turn ? -8 : 8;
+	int pawn_off_2 = state.turn ? -16 : 16;
+	const int p_att_l = state.turn ? -7 : 7;
+	const int p_att_r = state.turn ? -9 : 9;
+	const size_t id_ep = 12;
 	auto bb_pawn = state.bbs[ip];
+	const auto cpattacks = state.turn ? pawn_attacks : pawn_attacks_b;
 	for (auto it = bb_pawn.begin(); it != bb_pawn.end(); it.operator++()) {
+		
 		auto sqr = Square(*it);
 		int rank = sqr / 8;
-		Bitboard square = squares[sqr];
+		const bool promote_cond = (rank == 6)*(!state.turn) || (rank == 1)*state.turn;
+		square = squares[sqr];
 		// Pushes
-		Bitboard push_once = square << 8;
+		push_once = squares[sqr+pawn_off_1];
 		if (!(push_once & occ))
 		{
-			// 2nd rank, double push.
-			if (rank == 1)
+			// Double push.
+			if ( (rank == 1)*(!state.turn) || (rank == 6)*state.turn )
 			{
-				Bitboard push_twice = square << 16;
+				push_twice = squares[sqr+ pawn_off_2];
 				if (!(push_twice & occ))
-					*moves++ = CreateMove(sqr, Square(sqr + 16));
+					*moves++ = CreateMove(sqr, Square(sqr + pawn_off_2));
 			}
-			// 7th rank, promotion
-			if (rank == 6) 
+			// Promotion
+			if (promote_cond)
 				for (auto& prom : promote_pieces)
-					*moves++ = CreatePromotion(sqr, Square(sqr + 8), prom);
+					*moves++ = CreatePromotion(sqr, Square(sqr + pawn_off_1), prom);
 			else
-				*moves++ = CreateMove(sqr, Square(sqr + 8));
+				*moves++ = CreateMove(sqr, Square(sqr + pawn_off_1));
 		}
 	
-		if (pawn_attacks[sqr] & (occ_b | state.bbs[13]))
-		for (int shft : {7, 9})
+		if (cpattacks[sqr] & (occ_other | state.bbs[id_ep]))
+		for (int shft : {p_att_l, p_att_r})
 		{
 			// You cannot capture off the side of the board.
 			uint8_t file = sqr % 8;
-			if (file == 0 && shft == 7)
+			if (file == 0 && shft == p_att_l)
 				continue;
-			if (file == 7 && shft == 9)
+			if (file == 7 && shft == p_att_r)
 				continue;
+			if ((shft < -sqr) || (shft > 63-sqr))
+				throw;
 
-			Bitboard capt_diag = square << shft;
-			Square to = Square(sqr + shft);
-			if (capt_diag & (occ_b | state.bbs[13]))
+			capt_diag = square << shft;
+			auto to = Square(sqr + shft);
+			if (capt_diag & (occ_b | state.bbs[id_ep]))
 			{
-				if (rank == 6) // 7th rank, promotion
+				// Promotion
+				if (promote_cond)
 					for (auto& prom : promote_pieces)
 						*moves++ = CreatePromotion(sqr, to, prom);
 				else
 				{
 					// Taking enpassant
-					if (pawn_attacks[sqr] & state.bbs[13])
+					if (cpattacks[sqr] & state.bbs[id_ep])
 						*moves++ = CreateEnPassant(sqr, to);
 					else
 						*moves++ = CreateMove(sqr, to);
@@ -396,23 +410,26 @@ Move* generate_moves(const State& state, Move* moves) {
 		}
 	}
 
+	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
+	Bitboard current_occupation = accumulate<>(state.bbs + nn, state.bbs + nn + NUMBER_PIECES, Bitboard(0), bit_or);
+	auto not_nn = !state.turn + NUMBER_PIECES;
+	Bitboard other_occupation = accumulate<>(state.bbs + not_nn, state.bbs + not_nn + NUMBER_PIECES, Bitboard(0), bit_or);
+
 	/* Knight */
-	const uint8_t in = nn + KNIGHT;
-	auto bb_knight = state.bbs[in];
+	LegalJumperMoves(state, moves, KNIGHT, knight_attacks, current_occupation);
 
 	/* Bishop */
-	const uint8_t ib = nn + BISHOP;
-	auto bb_bishop = state.bbs[ib];
+	LegalSliderMoves(state, moves, BISHOP, bishop_directions, current_occupation, other_occupation );
 
 	/* Rook */
-	const uint8_t ir = nn + ROOK;
-	auto bb_rook = state.bbs[ir];
+	LegalSliderMoves(state, moves, ROOK, rook_directions, current_occupation, other_occupation );
+
+	/* Queen */
+	LegalSliderMoves(state, moves, QUEEN, rook_directions, current_occupation, other_occupation);
+	LegalSliderMoves(state, moves, QUEEN, bishop_directions, current_occupation, other_occupation);
 
 	/* King */
-	const uint8_t ik = nn + KING;
-	auto bb_king = state.bbs[ik];
-
-	return moves;
+	LegalJumperMoves(state, moves, KING, neighbours, current_occupation );
 }
 
 void PrettyPrint(const State& state)
@@ -484,4 +501,10 @@ void PrettyPrint(const State& state)
 	std::cout << std::endl;
 	std::cout << "plies: " << state.plies << std::endl;
 	std::cout << "colour to move: " << (state.turn ? "white" : "black") << std::endl;
+}
+
+std::uint64_t hash_combine(uint64_t lhs, uint64_t rhs)
+{
+	lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
+	return lhs;
 }
