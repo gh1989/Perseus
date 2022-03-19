@@ -320,13 +320,50 @@ void State::Apply(Move move) {
 		castle = castle & ~(turn ? (WQ + WK) : (BQ + WK));
 	}
 	c50 = new50 ? 0 : c50++;
+	turn = other;
+}
+
+bool isCheck(const State& state)
+{
+	/* Offset for bitboards */
+	const uint8_t nn = state.turn * NUMBER_PIECES;
+	const uint8_t not_nn = (!state.turn)*NUMBER_PIECES;
+
+	Bitboard thisKing = state.bbs[nn + KING];
+	auto otherKnights = state.bbs[not_nn + KNIGHT];
+	Square thisKingSquare = square_lookup.at( static_cast<unsigned long long>(thisKing) );
+	if (knight_attacks[thisKingSquare] & otherKnights)
+		return true;
+
+	auto thisPawnAttacks = state.turn ? pawn_attacks : pawn_attacks_b;
+	auto otherPawns = state.bbs[not_nn + PAWN];
+	if (thisPawnAttacks[thisKingSquare] & otherPawns)
+		return true;
+
+	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
+	Bitboard occupancy = accumulate<>(state.bbs, state.bbs + 12, Bitboard(0), bit_or);
+
+	auto queens = state.bbs[not_nn + QUEEN];
+	auto bishops = state.bbs[not_nn + BISHOP];
+	auto diagonals = queens | bishops;
+	if (SquareConnectedToBitboard(thisKingSquare, diagonals, occupancy&~diagonals, bishop_directions))
+		return true;
+
+	auto rooks = state.bbs[not_nn + ROOK];
+	auto straights = queens | rooks;
+	if (SquareConnectedToBitboard(thisKingSquare, straights, occupancy&~straights, rook_directions))
+		return true;
+	return false;
 }
 
 /* Move generation */
-void GenerateMoves(const State& state, Move* moves) {
+size_t GenerateMoves(const State& state, Move* moves) {
+	
+	size_t numMoves = 0;
 
 	/* Offset for bitboards */
 	const uint8_t nn = state.turn * NUMBER_PIECES;
+	const uint8_t not_nn = (!state.turn)*NUMBER_PIECES;
 
 	// All occupants of the state.
 	Bitboard occ = 0;
@@ -352,30 +389,37 @@ void GenerateMoves(const State& state, Move* moves) {
 	const int p_att_r = state.turn ? -9 : 9;
 	const size_t id_ep = 12;
 	auto bb_pawn = state.bbs[ip];
-	const auto cpattacks = state.turn ? pawn_attacks : pawn_attacks_b;
-	for (auto it = bb_pawn.begin(); it != bb_pawn.end(); it.operator++()) {
+	const auto cpattacks = !state.turn ? pawn_attacks : pawn_attacks_b;
+	bool trn = state.turn;
+	
+    for (auto it = bb_pawn.begin(); it != bb_pawn.end(); it.operator++()) {
 		
 		auto sqr = Square(*it);
 		int rank = sqr / 8;
-		const bool promote_cond = (rank == 6)*(!state.turn) || (rank == 1)*state.turn;
+		const bool promote_cond = ((rank == 6)&(!trn) || (rank == 1)&trn);
 		square = squares[sqr];
 		// Pushes
 		push_once = squares[sqr+pawn_off_1];
 		if (!(push_once & occ))
 		{
 			// Double push.
-			if ( (rank == 1)*(!state.turn) || (rank == 6)*state.turn )
+			if ( (rank == 1)&(!trn) || (rank == 6)&trn )
 			{
 				push_twice = squares[sqr+ pawn_off_2];
-				if (!(push_twice & occ))
+				if (!(push_twice & occ)){
 					*moves++ = CreateMove(sqr, Square(sqr + pawn_off_2));
+					numMoves++;
+				}
 			}
-			// Promotion
 			if (promote_cond)
-				for (auto& prom : promote_pieces)
+				for (auto& prom : promote_pieces) {
 					*moves++ = CreatePromotion(sqr, Square(sqr + pawn_off_1), prom);
-			else
+					numMoves++;
+				}
+			else {
 				*moves++ = CreateMove(sqr, Square(sqr + pawn_off_1));
+				numMoves++;
+			}
 		}
 	
 		if (cpattacks[sqr] & (occ_other | state.bbs[id_ep]))
@@ -390,46 +434,62 @@ void GenerateMoves(const State& state, Move* moves) {
 			if ((shft < -sqr) || (shft > 63-sqr))
 				throw;
 
-			capt_diag = square << shft;
+			capt_diag = shft < 0 ? square >> -shft : square << shft;
 			auto to = Square(sqr + shft);
-			if (capt_diag & (occ_b | state.bbs[id_ep]))
+			if (capt_diag & (occ_other | state.bbs[id_ep]))
 			{
 				// Promotion
 				if (promote_cond)
 					for (auto& prom : promote_pieces)
+					{
 						*moves++ = CreatePromotion(sqr, to, prom);
+						numMoves++;
+					}
 				else
 				{
 					// Taking enpassant
 					if (cpattacks[sqr] & state.bbs[id_ep])
+					{
 						*moves++ = CreateEnPassant(sqr, to);
+						numMoves++;
+					}
 					else
+					{
 						*moves++ = CreateMove(sqr, to);
+						numMoves++;
+					}
 				}
 			}
 		}
 	}
-
+	
 	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
 	Bitboard current_occupation = accumulate<>(state.bbs + nn, state.bbs + nn + NUMBER_PIECES, Bitboard(0), bit_or);
-	auto not_nn = !state.turn + NUMBER_PIECES;
 	Bitboard other_occupation = accumulate<>(state.bbs + not_nn, state.bbs + not_nn + NUMBER_PIECES, Bitboard(0), bit_or);
 
 	/* Knight */
-	LegalJumperMoves(state, moves, KNIGHT, knight_attacks, current_occupation);
+	size_t knightMoves = LegalJumperMoves(state, moves, KNIGHT, knight_attacks, current_occupation);
+	moves += knightMoves;
+
+	Bitboard queenbb = state.bbs[trn * NUMBER_PIECES + QUEEN];
+	Bitboard rookbb = state.bbs[trn * NUMBER_PIECES + ROOK];
+	Bitboard bishopbb = state.bbs[trn * NUMBER_PIECES + BISHOP];
 
 	/* Bishop */
-	LegalSliderMoves(state, moves, BISHOP, bishop_directions, current_occupation, other_occupation );
+	size_t bishopMoves = LegalSliderMoves(state, moves, queenbb | bishopbb, bishop_directions, current_occupation, other_occupation );
+	moves += bishopMoves;
 
 	/* Rook */
-	LegalSliderMoves(state, moves, ROOK, rook_directions, current_occupation, other_occupation );
-
-	/* Queen */
-	LegalSliderMoves(state, moves, QUEEN, rook_directions, current_occupation, other_occupation);
-	LegalSliderMoves(state, moves, QUEEN, bishop_directions, current_occupation, other_occupation);
+	size_t rookMoves = LegalSliderMoves(state, moves, rookbb | queenbb, rook_directions, current_occupation, other_occupation );
+	moves += rookMoves;
 
 	/* King */
-	LegalJumperMoves(state, moves, KING, neighbours, current_occupation );
+	size_t kingMoves = LegalJumperMoves(state, moves, KING, neighbours, current_occupation );
+	moves += kingMoves;
+
+	numMoves += kingMoves + rookMoves + bishopMoves + knightMoves;
+
+	return numMoves;
 }
 
 void PrettyPrint(const State& state)
@@ -500,7 +560,7 @@ void PrettyPrint(const State& state)
 
 	std::cout << std::endl;
 	std::cout << "plies: " << state.plies << std::endl;
-	std::cout << "colour to move: " << (state.turn ? "white" : "black") << std::endl;
+	std::cout << "colour to move: " << (!state.turn ? "white" : "black") << std::endl;
 }
 
 std::uint64_t hash_combine(uint64_t lhs, uint64_t rhs)

@@ -22,9 +22,8 @@ private:
 };
 
 /* 	class: BitBoard */
-class Bitboard
+struct Bitboard
 {
-public:
 	Bitboard() : bit_number(0) {}
 	Bitboard(uint64_t bit_number_) : bit_number(bit_number_) {}
 
@@ -96,9 +95,6 @@ public:
 	BitIterator<Bitboard> end() {
 		return 0;
 	}
-
-private:
-
 	uint64_t msb64(register uint64_t x) const {
 		x |= (x >> 1);
 		x |= (x >> 2);
@@ -488,9 +484,7 @@ public:
 };
 
 /* Move generation */
-void GenerateMoves(const State&, Move*);
-void LegalSliderMoves(const State&, Move*);
-void LegalJumperMoves(const State&, Move*);
+size_t GenerateMoves(const State&, Move*);
 
 /* Debugging, printing out */
 void PrettyPrint(const State& state);
@@ -508,16 +502,6 @@ T accumulate(InputIt first, InputIt last, T init,
 	return init;
 }
 
-struct StateHash
-{
-	std::uint64_t operator()(State const& s) const noexcept
-	{
-		auto hsh = accumulate<>(s.bbs, std::end(s.bbs), 0, hash_combine);
-		return hsh;
-	}
-};
-
-
 // Directions the rook can move
 static const std::pair<int, int> rook_directions[4] =
 {
@@ -529,7 +513,7 @@ static const std::pair<int, int> bishop_directions[4] =
 	{1, 1}, {-1, 1}, {1, -1}, {-1, -1}
 };
 
-inline void LegalJumperMoves(
+inline size_t LegalJumperMoves(
 	const State& s,
 	Move* moves,
 	Piece p,
@@ -537,7 +521,7 @@ inline void LegalJumperMoves(
 	Bitboard current_occupation )
 {
 	Bitboard piecebb = s.bbs[s.turn * NUMBER_PIECES + p ];
-
+	size_t numMoves = 0;
 	for (auto it = piecebb.begin(); it != piecebb.end(); it.operator++())
 	{
 		Square sqr = Square(*it);
@@ -548,20 +532,22 @@ inline void LegalJumperMoves(
 			Square sqr2 = Square(*it2);
 			auto move = CreateMove(Square(sqr), Square(sqr2));
 			*moves++ = move;
+			numMoves++;
 		}
 	}
+
+	return numMoves;
 }
 
-inline void LegalSliderMoves(
+inline size_t LegalSliderMoves(
 	const State& s,
 	Move* moves,
-	Piece p,
+	Bitboard piecebb,
 	const std::pair<int, int>* directions,
 	Bitboard current_occupation, 
 	Bitboard other_occupation )
 {
-	Bitboard piecebb = s.bbs[s.turn * NUMBER_PIECES + p];
-
+	size_t numMoves = 0;
 	for (auto it = piecebb.begin(); it != piecebb.end(); it.operator++())
 	{
 		Square sqr = Square(*it);
@@ -569,35 +555,36 @@ inline void LegalSliderMoves(
 
 		for (int i = 0; i < 4; i++)
 		{
-			auto dir = directions[i];
+			std::pair<int, int> dir = directions[i];
+			auto dx = dir.first;
+			auto dy = dir.second;
 			int sidx = sqr;
+			int rank = sidx / 8;
 			while (true)
 			{
-				int rank = sidx / 8;
-				if (dir.first > 0 && rank == 7)
+				if (dx > 0 && rank == 7)
 					break;
-				if (dir.first < 0 && rank == 0)
+				if (dx < 0 && rank == 0)
 					break;
 				int file = sidx % 8;
-				if (dir.second > 0 && file == 7)
+				if (dy > 0 && file == 7)
 					break;
-				if (dir.second < 0 && file == 0)
+				if (dy < 0 && file == 0)
 					break;
 
-				sidx += 8 * dir.first + dir.second;
-				if (sidx > 63 | sidx < 0)
+				sidx += 8 * dx + dy;
+				rank += dx;
+
+				if ( (sidx > 63) | (sidx < 0))
 					break;
 				Bitboard new_bb = squares[sidx];
+
 				// slider hits own piece
 				if (new_bb&current_occupation)
 					break;
 				auto sqrto = Square(sidx);
-				// Skip non-captures.
-				/*
-				if (MT == Capture && !(theirs & squares[sidx]))
-					continue;
-				*/
 				*moves++ = CreateMove(sqr, sqrto);
+				numMoves++;
 
 				// slider hits opposition 
 				if (new_bb&other_occupation)
@@ -605,4 +592,49 @@ inline void LegalSliderMoves(
 			}
 		}
 	}
+
+	return numMoves;
+}
+
+bool isCheck(const State& state);
+
+inline bool SquareConnectedToBitboard(
+	Square source,
+	Bitboard target,
+	Bitboard obstacle,
+	const std::pair<int, int>* directions )
+{
+	for (int i = 0; i < 4; i++)
+	{
+		std::pair<int, int> dir = directions[i];
+		auto dx = dir.first;
+		auto dy = dir.second;
+		int sidx = source;
+		int rank = sidx / 8;
+		while (true)
+		{
+			if (dx > 0 && rank == 7)
+				break;
+			if (dx < 0 && rank == 0)
+				break;
+			int file = sidx % 8;
+			if (dy > 0 && file == 7)
+				break;
+			if (dy < 0 && file == 0)
+				break;
+
+			sidx += 8 * dx + dy;
+			rank += dx;
+
+			if ((sidx > 63) | (sidx < 0))
+				break;
+
+			auto tmpbb = squares[sidx];
+			if (tmpbb & obstacle)
+				break;
+			if (tmpbb & target)
+				return true;
+		}
+	}
+	return false;
 }
