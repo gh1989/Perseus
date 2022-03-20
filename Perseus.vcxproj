@@ -103,7 +103,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -117,11 +117,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bitboard.h" />
+    <ClInclude Include="move.h" />
+    <ClInclude Include="geometry.h" />
+    <ClInclude Include="move_generation.h" />
+    <ClInclude Include="random.h" />
+    <ClInclude Include="square.h" />
     <ClInclude Include="state.h" />
+    <ClInclude Include="string_transforms.h" />
+    <ClInclude Include="types.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="geometry.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="move.cpp" />
+    <ClCompile Include="move_generation.cpp" />
+    <ClCompile Include="square.cpp" />
     <ClCompile Include="state.cpp" />
+    <ClCompile Include="string_transforms.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
