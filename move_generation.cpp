@@ -171,12 +171,14 @@ size_t GenerateMoves(const State& state, Move* moves) {
 	moves += kingMoves;
 
 	// Add the castling
+	/*
 	auto kingStart = !state.turn ? e1 : e8;
 	auto queensideCastleEnd = !state.turn ? c1 : c8;
 	auto kingsideCastleEnd = !state.turn ? g1 : g8;
 	*moves++ = CreateCastle(kingStart, queensideCastleEnd);
 	*moves++ = CreateCastle(kingStart, kingsideCastleEnd);
 	kingMoves += 2;
+	*/
 
 	numMoves += kingMoves + rookMoves + bishopMoves + knightMoves;
 
