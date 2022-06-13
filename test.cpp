@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include "test.h"
 #include "move_generation.h"
 #include "random.h"
 #include "state.h"
