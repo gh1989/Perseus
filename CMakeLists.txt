@@ -13,11 +13,13 @@ set(SOURCE_FILES
   move_generation.h
   random.h
   string_transforms.h
+  test.h
   types.h
   geometry.cpp
   move.cpp
   square.cpp
   state.cpp
+  test.cpp
   move_generation.cpp
   string_transforms.cpp
   main.cpp)
