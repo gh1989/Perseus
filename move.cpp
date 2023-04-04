@@ -1,7 +1,7 @@
 #include "move.h"
 
 Square GetFrom(Move move) {
-	const __int16 sqr = from_mask & move;
+	const __int16_t sqr = from_mask & move;
 	return Square(sqr);
 }
 Square GetTo(Move move) {

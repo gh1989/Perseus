@@ -1,23 +1,8 @@
 #pragma once
 #include <stdint.h>
 #include <stdlib.h>
-#include <intrin.h>
-#include <iterator>    
-
-/* 	class: BitIterator */
-template<class T>
-class BitIterator {
-public:
-	BitIterator(uint64_t value) : value_(value) {};
-	bool operator!=(const BitIterator& other) {
-		return value_ != other.value_;
-	}
-	void operator++() { value_ &= (value_ - 1); }
-	unsigned int operator*() const { return value_.nLSB(); }
-
-private:
-	T value_;
-};
+#include <bit>
+#include <iterator> 
 
 /* 	class: BitBoard */
 struct Bitboard
@@ -66,41 +51,19 @@ struct Bitboard
 	}
 
 	uint64_t PopCnt() const {
-		return __popcnt64(bit_number);
+		return std::popcount(bit_number);
 	}
 
 	uint8_t nMSB() const {
-		uint64_t msb_val = msb64(bit_number);
-		uint8_t msb_num = 0;
-		while (msb_val > 1)
-		{
-			msb_num++;
-			msb_val >>= 1;
-		}
-		return msb_num;
+		return std::bit_floor(bit_number);
 	}
 
 	unsigned int nLSB() const {
-		unsigned long result;
-		_BitScanForward64(&result, bit_number);
-		return result;
+		return std::numeric_limits<decltype(bit_number)>::digits - std::bit_width(bit_number);
 	}
-
-	BitIterator<Bitboard> begin() {
-		return bit_number;
-	}
-
-	BitIterator<Bitboard> end() {
-		return 0;
-	}
-	uint64_t msb64(register uint64_t x) const {
-		x |= (x >> 1);
-		x |= (x >> 2);
-		x |= (x >> 4);
-		x |= (x >> 8);
-		x |= (x >> 16);
-		x |= (x >> 32);
-		return(x & ~(x >> 1));
+	
+	uint64_t msb64(uint64_t x) const {
+		return std::countr_zero(x);
 	}
 
 	uint64_t bit_number;
@@ -125,7 +88,29 @@ inline Bitboard Rotate180(Bitboard bb)
 	return bb & m1;
 }
 
-inline uint64_t _ByteSwap(uint64_t to_swap)
-{
-	return _byteswap_uint64(to_swap);
-}
+/* class: BitIterator */
+class BitIterator {
+public:
+    BitIterator(uint64_t value, uint8_t index) : value_(value), index_(index) {};
+    bool operator!=(const BitIterator& other) const {
+        return value_ != other.value_ || index_ != other.index_;
+    }
+    void operator++() {
+        value_ &= (value_ - 1);
+        index_ = value_.nLSB();
+    }
+    unsigned int operator*() const { return index_; }
+private:
+    Bitboard value_;
+    uint8_t index_;
+};
+
+/* create a BitIterator range for a Bitboard */
+class BitboardRange {
+public:
+    BitboardRange(Bitboard bb) : bb_(bb) {};
+    BitIterator begin() const { return BitIterator(bb_, bb_.nLSB()); }
+    BitIterator end() const { return BitIterator(0, 64); }
+private:
+    Bitboard bb_;
+};

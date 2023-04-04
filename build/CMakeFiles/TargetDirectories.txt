@@ -1,0 +1,3 @@
+/Users/gregg/Code/Perseus/build/CMakeFiles/ChessEngine.dir
+/Users/gregg/Code/Perseus/build/CMakeFiles/edit_cache.dir
+/Users/gregg/Code/Perseus/build/CMakeFiles/rebuild_cache.dir

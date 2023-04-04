@@ -1,26 +1,28 @@
 #pragma once
+
+#include <array>   
 #include "bitboard.h"
 #include "square.h"
 #include "types.h"
+
 
 bool SquareConnectedToBitboard(
 	Square source,
 	Bitboard target,
 	Bitboard obstacle,
-	const std::pair<int, int>* directions);
+	const std::array<std::pair<int, int>, 4>& directions);
 
 // Reflect a square
 Square Reflect(Square sqr);
 
 // Directions the rook can move
-static const std::pair<int, int> rook_directions[4] =
-{
-	{1, 0}, {-1, 0}, {0, 1}, {0, -1}
+static const std::array<std::pair<int, int>, 4> rook_directions {
+	std::make_pair(1, 0), std::make_pair(-1, 0), std::make_pair(0, 1), std::make_pair(0, -1)
 };
+
 // Directions the bishop can move
-static const std::pair<int, int> bishop_directions[4] =
-{
-	{1, 1}, {-1, 1}, {1, -1}, {-1, -1}
+static const std::array<std::pair<int, int>, 4> bishop_directions {
+	std::make_pair(1, 1), std::make_pair(-1, 1), std::make_pair(1, -1), std::make_pair(-1, -1)
 };
 
 /* Bitboards */

@@ -4,7 +4,7 @@ bool SquareConnectedToBitboard(
 	Square source,
 	Bitboard target,
 	Bitboard obstacle,
-	const std::pair<int, int>* directions)
+	const std::array<std::pair<int, int>, 4>& directions)
 {
 	for (int i = 0; i < 4; i++)
 	{

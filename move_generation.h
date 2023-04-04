@@ -1,4 +1,5 @@
 #pragma once
+
 #include "bitboard.h"
 #include "geometry.h"
 #include "move.h"
@@ -22,16 +23,17 @@ size_t GenerateMoves(const State&, Move*);
 bool isCheck(const State& state, bool turn);
 
 size_t JumperMoves(
-	const State& s,
-	Move* moves,
-	Piece p,
-	const Bitboard* attacks,
-	Bitboard current_occupation);
+    const State& s,
+    Move* moves,
+    Piece p,
+    const Bitboard* attacks,
+    const Bitboard& current_occupation);
 
-size_t SliderMoves(
-	const State& s,
-	Move* moves,
-	Bitboard piecebb,
-	const std::pair<int, int>* directions,
-	Bitboard current_occupation,
-	Bitboard other_occupation);
+template <std::size_t NumDirections>
+inline std::size_t SliderMoves(
+    const State& state,
+    Move* moves,
+    const Bitboard& sliderPieces,
+    const std::array<std::pair<int, int>, NumDirections>& directions,
+    const Bitboard& currentOccupancy,
+    const Bitboard& otherOccupancy);

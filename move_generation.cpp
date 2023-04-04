@@ -11,9 +11,9 @@ bool isCheck(const State& state, bool turn)
 	Bitboard thisKing = state.bbs[nn + KING];
 	auto otherKnights = state.bbs[not_nn + KNIGHT];
 
-	for (auto it = thisKing.begin(); it != thisKing.end(); it.operator++())
+	for (auto sqbb : BitboardRange(thisKing))
 	{
-		auto thisKingSquare = Square(*it);
+		auto thisKingSquare = Square(sqbb);
 		if (knight_attacks[thisKingSquare] & otherKnights)
 			return true;
 
@@ -75,9 +75,9 @@ size_t GenerateMoves(const State& state, Move* moves) {
 	const auto cpattacks = !state.turn ? pawn_attacks : pawn_attacks_b;
 	bool trn = state.turn;
 	const Piece promote_pieces[4] = { KNIGHT, BISHOP, ROOK, QUEEN };
-	for (auto it = bb_pawn.begin(); it != bb_pawn.end(); it.operator++()) {
+	for (auto sqbb : BitboardRange(bb_pawn)) {
 
-		auto sqr = Square(*it);
+		auto sqr = Square(sqbb);
 		int rank = sqr / 8;
 		const bool promote_cond = ((rank == 6)&(!trn) || (rank == 1)&trn);
 		square = squares[sqr];
@@ -198,84 +198,67 @@ size_t GenerateMoves(const State& state, Move* moves) {
 }
 
 size_t JumperMoves(
-	const State& s,
-	Move* moves,
-	Piece p,
-	const Bitboard* attacks,
-	Bitboard current_occupation)
+    const State& s,
+    Move* moves,
+    Piece p,
+    const Bitboard* attacks,
+    const Bitboard& current_occupation)
 {
-	Bitboard piecebb = s.bbs[s.turn * NUMBER_PIECES + p];
-	size_t numMoves = 0;
-	for (auto it = piecebb.begin(); it != piecebb.end(); it.operator++())
-	{
-		Square sqr = Square(*it);
-		;			Bitboard square = squares[sqr];
-		auto attack = attacks[sqr] & (~current_occupation);
-		for (auto it2 = attack.begin(); it2 != attack.end(); it2.operator++())
-		{
-			Square sqr2 = Square(*it2);
-			auto move = CreateMove(Square(sqr), Square(sqr2));
-			*moves++ = move;
-			numMoves++;
-		}
-	}
+    const Bitboard& piecebb = s.bbs[s.turn * NUMBER_PIECES + p];
+    size_t numMoves = 0;
+    for (const auto& sqbb : BitboardRange(piecebb))
+    {
+        Square sqr = Square(sqbb);
+        Bitboard square = squares[sqr];
+        const auto& attack = attacks[sqr] & (~current_occupation);
+        std::transform(BitboardRange(attack).begin(), BitboardRange(attack).end(), moves,
+            [&](Bitboard sqbb2) {
+                Square sqr2 = Square(int(sqbb2));
+                return CreateMove(sqr, sqr2);
+            });
+        numMoves += attack.PopCnt();
+        moves += attack.PopCnt();
+    }
 
-	return numMoves;
+    return numMoves;
 }
 
-inline size_t SliderMoves(
-	const State& s,
-	Move* moves,
-	Bitboard piecebb,
-	const std::pair<int, int>* directions,
-	Bitboard current_occupation,
-	Bitboard other_occupation)
+template <std::size_t NumDirections>
+inline std::size_t SliderMoves(
+    const State& state,
+    Move* moves,
+    const Bitboard& sliderPieces,
+    const std::array<std::pair<int, int>, NumDirections>& directions,
+    const Bitboard& currentOccupancy,
+    const Bitboard& otherOccupancy)
 {
-	size_t numMoves = 0;
-	for (auto it = piecebb.begin(); it != piecebb.end(); it.operator++())
-	{
-		Square sqr = Square(*it);
-		Bitboard square = squares[sqr];
+    std::size_t numMoves = 0;
+    for (auto sliderSquare : BitboardRange(sliderPieces))
+    {
+        Bitboard squareBB = squares[sliderSquare];
+        for (const auto& dir : directions)
+        {
+            int dx = dir.first;
+            int dy = dir.second;
+            int sidx = sliderSquare;
+            int rank = sidx / 8;
+            for (; (dx > 0 && rank < 7) || (dx < 0 && rank > 0) || (dy > 0 && sidx % 8 < 7) || (dy < 0 && sidx % 8 > 0); sidx += 8 * dx + dy, rank += dx)
+            {
+                if (sidx < 0 || sidx > 63)
+                    break;
 
-		for (int i = 0; i < 4; i++)
-		{
-			std::pair<int, int> dir = directions[i];
-			auto dx = dir.first;
-			auto dy = dir.second;
-			int sidx = sqr;
-			int rank = sidx / 8;
-			while (true)
-			{
-				if (dx > 0 && rank == 7)
-					break;
-				if (dx < 0 && rank == 0)
-					break;
-				int file = sidx % 8;
-				if (dy > 0 && file == 7)
-					break;
-				if (dy < 0 && file == 0)
-					break;
+                Bitboard newSquareBB = squares[sidx];
 
-				sidx += 8 * dx + dy;
-				rank += dx;
+                if (newSquareBB & currentOccupancy)
+                    break;
 
-				if ((sidx > 63) | (sidx < 0))
-					break;
-				Bitboard new_bb = squares[sidx];
+                *moves++ = CreateMove(Square(sliderSquare), Square(sidx));
+                numMoves++;
 
-				// slider hits own piece
-				if (new_bb&current_occupation)
-					break;
-				auto sqrto = Square(sidx);
-				*moves++ = CreateMove(sqr, sqrto);
-				numMoves++;
-
-				// slider hits opposition 
-				if (new_bb&other_occupation)
-					break;
-			}
-		}
-	}
-
-	return numMoves;
+                if (newSquareBB & otherOccupancy)
+                    break;
+            }
+        }
+    }
+    return numMoves;
 }
