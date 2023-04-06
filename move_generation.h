@@ -18,7 +18,7 @@ T accumulate(InputIt first, InputIt last, T init,
 }
 
 /* Move generation */
-size_t GenerateMoves(const State&, Move*);
+size_t GenerateMoves(const State&, Move* moves );
 
 bool isCheck(const State& state, bool turn);
 
