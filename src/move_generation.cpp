@@ -40,7 +40,7 @@ bool isCheck(const State& state, bool turn)
 }
 
 /* Move generation */
-size_t GenerateMoves(const State& state, Move* moves) {
+size_t GenerateMoves(const State& state, Move * moves) {
 
 	size_t numMoves = 0;
 
@@ -125,8 +125,8 @@ size_t GenerateMoves(const State& state, Move* moves) {
 					if (promote_cond)
 						for (auto& prom : promote_pieces)
 						{
-							*moves++ = CreatePromotion(sqr, to, prom);
-							numMoves++;
+							//*moves++ = CreatePromotion(sqr, to, prom);
+							//numMoves++;
 						}
 					else
 					{
@@ -151,24 +151,24 @@ size_t GenerateMoves(const State& state, Move* moves) {
 	Bitboard other_occupation = accumulate<>(state.bbs + not_nn, state.bbs + not_nn + NUMBER_PIECES, Bitboard(0), bit_or);
 
 	/* Knight */
-	size_t knightMoves = JumperMoves(state, moves, KNIGHT, knight_attacks, current_occupation);
-	moves += knightMoves;
+	//size_t knightMoves = JumperMoves(state, moves, KNIGHT, knight_attacks, current_occupation);
+	//moves += knightMoves;
 
 	Bitboard queenbb = state.bbs[trn * NUMBER_PIECES + QUEEN];
 	Bitboard rookbb = state.bbs[trn * NUMBER_PIECES + ROOK];
 	Bitboard bishopbb = state.bbs[trn * NUMBER_PIECES + BISHOP];
 
 	/* Bishop */
-	size_t bishopMoves = SliderMoves(state, moves, queenbb | bishopbb, bishop_directions, current_occupation, other_occupation);
-	moves += bishopMoves;
+	//size_t bishopMoves = SliderMoves(state, moves, queenbb | bishopbb, bishop_directions, current_occupation, other_occupation);
+	//moves += bishopMoves;
 
 	/* Rook */
-	size_t rookMoves = SliderMoves(state, moves, rookbb | queenbb, rook_directions, current_occupation, other_occupation);
-	moves += rookMoves;
+	//size_t rookMoves = SliderMoves(state, moves, rookbb | queenbb, rook_directions, current_occupation, other_occupation);
+	//moves += rookMoves;
 
 	/* King */
-	size_t kingMoves = JumperMoves(state, moves, KING, neighbours, current_occupation);
-	moves += kingMoves;
+	//size_t kingMoves = JumperMoves(state, moves, KING, neighbours, current_occupation);
+	//moves += kingMoves;
 
 	// Add the castling
 
@@ -181,18 +181,18 @@ size_t GenerateMoves(const State& state, Move* moves) {
 
 		if ((rookbb & squares[!trn ? h1 : h8]) && (state.castle & ( trn ? Castling::BK : Castling::WK)))
 		{
-			*moves++ = CreateCastle(kingStart, kingsideCastleEnd);
-			kingMoves++;
+			//*moves++ = CreateCastle(kingStart, kingsideCastleEnd);
+			//kingMoves++;
 		}
 
 		if ((rookbb & squares[!trn ? a1 : a8]) && (state.castle & (trn ? Castling::BK : Castling::WK)))
 		{
-			*moves++ = CreateCastle(kingStart, queensideCastleEnd);
-			kingMoves++;
+			//*moves++ = CreateCastle(kingStart, queensideCastleEnd);
+			//kingMoves++;
 		}
 	}
 
-	numMoves += kingMoves + rookMoves + bishopMoves + knightMoves;
+	//numMoves += kingMoves + rookMoves + bishopMoves + knightMoves;
 
 	return numMoves;
 }
