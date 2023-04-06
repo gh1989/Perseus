@@ -48,7 +48,7 @@ void PrettyPrint(const State& state)
 	}
 
 	std::cout << output;
-	Bitboard ep = state.bbs[13];
+	Bitboard ep = state.bbs[12];
 
 	if (ep)
 	{
@@ -178,9 +178,9 @@ State StateFromFen(std::string fen)
 	state.turn = (colour_string != "w");
 
 	if (epstring != "-")
-		state.bbs[13] = BitboardFromString(epstring);
+		state.bbs[12] = BitboardFromString(epstring);
 	else
-		state.bbs[13] = 0;
+		state.bbs[12] = 0;
 
 	if (fiftycounter != "-") {
 		uint8_t counter = std::stoi(fiftycounter);
