@@ -10,10 +10,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-# Create the directories for the build configurations
-make_directory(Debug)
-make_directory(Release)
-
 # Add the source files to your project
 set(SOURCES
     src/bitboard.h
@@ -34,28 +30,26 @@ set(SOURCES
     src/move_generation.cpp
     src/string_transforms.cpp
     src/main.cpp
-    tests/test_bitboard.cpp
 )
 
-# Create the executable targets for the debug and release builds
-add_executable(ChessEngine_Debug ${SOURCES})
-set_target_properties(ChessEngine_Debug PROPERTIES OUTPUT_NAME "Debug/ChessEngine")
+# Create the executable targets
+add_executable(ChessEngine ${SOURCES})
 
-add_executable(ChessEngine_Release ${SOURCES})
-set_target_properties(ChessEngine_Release PROPERTIES OUTPUT_NAME "Release/ChessEngine")
+# Add the include directories
+target_include_directories(ChessEngine PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
-# Link against any necessary libraries for the tests
-# (in this example, we assume that the main ChessEngine library
-# is already included in the SOURCES list)
+# Add Catch2
+find_package(Catch2 REQUIRED)
+include_directories(${CATCH2_INCLUDE_DIRS})
+
+# Add tests executable
 set(TEST_SOURCES
     tests/test_bitboard.cpp
 )
 
-# Create the test executable target
-add_executable(TestChessEngine ${TEST_SOURCES})
+add_executable(tests ${TEST_SOURCES})
+target_link_libraries(tests Catch2::Catch2)
 
-# Link against the main ChessEngine library and any other necessary libraries
-target_link_libraries(TestChessEngine ChessEngine)
-
-# Add the test target to the "test" CMake target
-add_test(NAME MyTest COMMAND TestChessEngine)
+# Add a custom test target
+include(Catch)
+catch_discover_tests(tests)

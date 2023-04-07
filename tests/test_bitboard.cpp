@@ -1,39 +1,62 @@
-#include "catch.hpp"
-#include "bitboard.h"
 
-TEST_CASE("BitBoard tests", "[BitBoard]") {
+#include "../src/bitboard.h"
 
-    SECTION("Empty board has no pieces set") {
-        BitBoard empty_board;
-        REQUIRE(empty_board.value() == 0ULL);
+TEST_CASE("Empty board has no pieces set", "[bitboard]") {
+    Bitboard empty_board;
+    REQUIRE(empty_board.bit_number == 0ULL);
+}
+
+TEST_CASE("Bitwise or sets correct bits", "[bitboard]") {
+    Bitboard board1(1ULL << 5);
+    Bitboard board2(1ULL << 3);
+    Bitboard result = board1 | board2;
+    REQUIRE(result.bit_number == ((1ULL << 5) | (1ULL << 3)));
+}
+
+TEST_CASE("Bitwise and clears correct bits", "[bitboard]") {
+    Bitboard board1(0xFF);
+    Bitboard board2(0x0F);
+    Bitboard result = board1 & board2;
+    REQUIRE(result.bit_number == 0x0FUL);
+}
+
+TEST_CASE("Bitwise xor toggles correct bits", "[bitboard]") {
+    Bitboard board1(0xFF);
+    Bitboard board2(0x0F);
+    Bitboard result = board1 ^ board2;
+    REQUIRE(result.bit_number == 0xF0ULL);
+}
+
+TEST_CASE("Bitwise not inverts bits", "[bitboard]") {
+    Bitboard board(0x3F);
+    Bitboard result = ~board;
+    REQUIRE(result.bit_number == ~(0x3FULL));
+}
+
+TEST_CASE("Bit shift left shifts bits", "[bitboard]") {
+    Bitboard board(0x1);
+    Bitboard result = board << 3;
+    REQUIRE(result.bit_number == 0x8ULL);
+}
+
+TEST_CASE("Bit shift right shifts bits", "[bitboard]") {
+    Bitboard board(0x80);
+    Bitboard result = board >> 3;
+    REQUIRE(result.bit_number == 0x10ULL);
+}
+
+TEST_CASE("Bitwise and assignment clears correct bits", "[bitboard]") {
+    Bitboard board1(0xFF);
+    Bitboard board2(0x0F);
+    board1 &= board2;
+    REQUIRE(board1.bit_number == 0x0FUL);
+}
+
+TEST_CASE("Bitboard iterator iteration works", "[bitboard]") {
+    Bitboard board(0xA5);
+    unsigned int count = 0;
+    for (auto it : BitboardRange(board)) {
+        ++count;
     }
-
-    SECTION("Setting a bit sets the corresponding piece") {
-        BitBoard board;
-        board.set(1);
-        REQUIRE(board.value() == 2ULL);
-    }
-
-    SECTION("Clearing a bit clears the corresponding piece") {
-        BitBoard board;
-        board.set(1);
-        board.clear(1);
-        REQUIRE(board.value() == 0ULL);
-    }
-
-    SECTION("Bitwise operations work as expected") {
-        BitBoard board1(3);
-        BitBoard board2(6);
-        REQUIRE((board1 & board2).value() == 2ULL);
-        REQUIRE((board1 | board2).value() == 7ULL);
-        REQUIRE((board1 ^ board2).value() == 5ULL);
-    }
-
-    SECTION("Bitwise shift operations work as expected") {
-        BitBoard board(1);
-        board <<= 2;
-        REQUIRE(board.value() == 4ULL);
-        board >>= 1;
-        REQUIRE(board.value() == 2ULL);
-    }
+    REQUIRE(count == 4);
 }
