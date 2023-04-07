@@ -1,5 +1,7 @@
-
+#include <catch2/catch_all.hpp>
 #include "../src/bitboard.h"
+
+#define CATCH_CONFIG_MAIN
 
 TEST_CASE("Empty board has no pieces set", "[bitboard]") {
     Bitboard empty_board;
@@ -59,4 +61,9 @@ TEST_CASE("Bitboard iterator iteration works", "[bitboard]") {
         ++count;
     }
     REQUIRE(count == 4);
+}
+
+int main(int argc, char* argv[]) {
+    // This line starts the Catch2 test runner
+    return Catch::Session().run(argc, argv);
 }
