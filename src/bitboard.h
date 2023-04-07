@@ -55,15 +55,11 @@ struct Bitboard
 	}
 
 	uint8_t nMSB() const {
-		return std::bit_floor(bit_number);
+    return std::bit_floor(bit_number) - 1;
 	}
 
-	unsigned int nLSB() const {
+	uint8_t nLSB() const {
 		return std::numeric_limits<decltype(bit_number)>::digits - std::bit_width(bit_number);
-	}
-	
-	uint64_t msb64(uint64_t x) const {
-		return std::countr_zero(x);
 	}
 
 	uint64_t bit_number;
