@@ -44,7 +44,7 @@ include_directories(${CATCH2_INCLUDE_DIRS})
 
 # Add tests executable
 set(TEST_SOURCES
-    tests/test_bitboard.cpp
+    tests/test_all.cpp
 )
 
 add_executable(tests ${TEST_SOURCES})
