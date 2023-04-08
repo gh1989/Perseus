@@ -64,6 +64,9 @@ TEST_CASE("nMSB returns correct result for non-zero bitboards", "[bitboard]") {
 
     Bitboard board3(0xFF);
     REQUIRE(board3.nMSB() == 7);
+
+    Bitboard board4(0x0102040800000000ULL);
+    REQUIRE(board4.nMSB() == 56);
 }
 
 TEST_CASE("nMSB returns 0 for zero bitboard", "[bitboard]") {
@@ -80,6 +83,9 @@ TEST_CASE("nLSB returns correct result for non-zero bitboards", "[bitboard]") {
 
     Bitboard board3(0xFF);
     REQUIRE(board3.nLSB() == 0);
+
+    Bitboard board4(0x0102040800000000ULL);
+    REQUIRE(board4.nLSB() == 35);
 }
 
     TEST_CASE("nLSB returns 0 for zero bitboard", "[bitboard]") {
@@ -110,8 +116,8 @@ TEST_CASE("nLSB returns correct result for non-zero bitboards", "[bitboard]") {
         SECTION("Bitboard with multiple bits") {
             Bitboard bb = 0x0102040800000000ULL;
             unsigned int count = 0;
-            unsigned int expected[4] = {0, 9, 18, 31};
-            for (BitIterator it(bb, bb.nLSB()); it != BitIterator(0, 64); ++it) {
+            unsigned int expected[4] = {35, 42, 49, 56};
+            for (BitIterator it(bb.bit_number, bb.nLSB()); it != BitIterator(0, 64); ++it) {
                 REQUIRE(*it == expected[count]);
                 count++;
             }
@@ -119,33 +125,46 @@ TEST_CASE("nLSB returns correct result for non-zero bitboards", "[bitboard]") {
         }
     }
 
-    TEST_CASE("Rotation of 0x8040201008040201ULL") {
-        Bitboard bb = 0x8040201008040201ULL;
-        Bitboard expected = 0x0102040810204080ULL;
-        Bitboard result = Rotate180(bb);
-        REQUIRE(result == expected);
+    TEST_CASE("BitboardRange", "[BitboardRange]") {
+    SECTION("Empty bitboard") {
+        Bitboard bb = 0;
+        unsigned int count = 0;
+        for (unsigned int i : BitboardRange(bb)) {
+            count++;
+        }
+        REQUIRE(count == 0);
     }
 
-    TEST_CASE("Rotation of 0x8000000000000000ULL") {
+    SECTION("Bitboard with one bit") {
         Bitboard bb = 0x8000000000000000ULL;
-        Bitboard expected = 0x0000000000000080ULL;
-        Bitboard result = Rotate180(bb);
-        REQUIRE(result == expected);
+        unsigned int count = 0;
+        for (unsigned int i : BitboardRange(bb)) {
+            count++;
+            REQUIRE(i == 63);
+        }
+        REQUIRE(count == 1);
     }
 
-    TEST_CASE("Rotation of 0x0101010101010101ULL") {
-        Bitboard bb = 0x0101010101010101ULL;
-        Bitboard expected = 0x8080808080808080ULL;
-        Bitboard result = Rotate180(bb);
-        REQUIRE(result == expected);
+    SECTION("Bitboard with multiple bits") {
+        Bitboard bb = 0x0102040800000000ULL;
+        unsigned int count = 0;
+        unsigned int expected[4] = {35, 42, 49, 56};
+        for (unsigned int i : BitboardRange(bb)) {
+            REQUIRE(i == expected[count]);
+            count++;
+        }
+        REQUIRE(count == 4);
     }
 
-    TEST_CASE("Rotation of 0x55AA55AA55AA55AAULL") {
-        Bitboard bb = 0x55AA55AA55AA55AAULL;
-        Bitboard expected = 0xAA55AA55AA55AA55ULL;
-        Bitboard result = Rotate180(bb);
-        REQUIRE(result == expected);
+    SECTION("Full bitboard") {
+        Bitboard bb = ~0ULL;
+        unsigned int count = 0;
+        for (unsigned int i : BitboardRange(bb)) {
+            count++;
+        }
+        REQUIRE(count == 64);
     }
+}
 
 int main(int argc, char* argv[]) {
     // This line starts the Catch2 test runner

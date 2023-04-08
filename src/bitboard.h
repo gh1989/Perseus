@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <limits>
 #include <stdint.h>
 #include <stdlib.h>
@@ -57,51 +58,38 @@ struct Bitboard
 
 	uint8_t nMSB()
 	{
-		// If the value is 0, return 0 (the position of the 0th bit)
-		if (bit_number == 0) {
-			return 0;
-		}
-		
-		// Use __builtin_clz to count the number of leading zeros in the value
-		// Subtract the number of leading zeros from the number of bits in the value's type
-		return std::numeric_limits<uint64_t>::digits - __builtin_clzll(bit_number) - 1;
+		if (bit_number == 0) return 0;
+		uint8_t position = 63;
+		while ((bit_number & (1ULL << position)) == 0) position--;	
+		return position;
 	}
-	uint8_t nLSB() const {
-		// If the value is 0, return 64
-		if (bit_number == 0) {
-			return 64;
-		}
 
-		return __builtin_ctzll(bit_number);
+	uint8_t nLSB() const {
+		if (bit_number == 0) return 64;
+		uint8_t position = 0;
+		while ((bit_number & (1ULL << position)) == 0) position++;
+		return position;
 	}
 
 	uint64_t bit_number;
 };
 
-/* Bitboard functions */
-inline Bitboard Rotate180(Bitboard bb)
-{
-    bb.bit_number = __builtin_bswap64(bb.bit_number);
-    bb.bit_number = ((bb.bit_number >> 1) & 0x5555555555555555) | ((bb.bit_number & 0x5555555555555555) << 1);
-    bb.bit_number = ((bb.bit_number >> 2) & 0x3333333333333333) | ((bb.bit_number & 0x3333333333333333) << 2);
-    bb.bit_number = ((bb.bit_number >> 4) & 0x0F0F0F0F0F0F0F0F) | ((bb.bit_number & 0x0F0F0F0F0F0F0F0F) << 4);
-    bb.bit_number = ((bb.bit_number >> 8) & 0x00FF00FF00FF00FF) | ((bb.bit_number & 0x00FF00FF00FF00FF) << 8);
-    bb.bit_number = ((bb.bit_number >> 16) & 0x0000FFFF0000FFFF) | ((bb.bit_number & 0x0000FFFF0000FFFF) << 16);
-    bb.bit_number = (bb.bit_number >> 32) | (bb.bit_number << 32);
-    return bb;
-}
-
 /* class: BitIterator */
 class BitIterator {
 public:
-    BitIterator(uint64_t value, uint8_t index) : value_(value), index_(index) {};
+    BitIterator(Bitboard value, uint8_t index) : value_(value), index_(index) {};
     bool operator!=(const BitIterator& other) const {
-        return value_ != other.value_ || index_ != other.index_;
+        return (value_ != other.value_) || (index_ != other.index_);
     }
-    void operator++() {
-        value_ &= (value_ - 1);
-        index_ = value_.nLSB();
-    }
+	void operator++() {
+    	value_ &= (value_ - 1);
+    	if (value_) {
+        	index_ = value_.nLSB();
+    	} else {
+        	index_ = 64;
+    	}
+}	
+
     unsigned int operator*() const { return index_; }
 private:
     Bitboard value_;
