@@ -1,4 +1,5 @@
 #pragma once
+#include <limits>
 #include <stdint.h>
 #include <stdlib.h>
 #include <bit>
@@ -54,12 +55,24 @@ struct Bitboard
 		return std::popcount(bit_number);
 	}
 
-	uint8_t nMSB() const {
-    return std::bit_floor(bit_number) - 1;
+	uint8_t nMSB()
+	{
+		// If the value is 0, return 0 (the position of the 0th bit)
+		if (bit_number == 0) {
+			return 0;
+		}
+		
+		// Use __builtin_clz to count the number of leading zeros in the value
+		// Subtract the number of leading zeros from the number of bits in the value's type
+		return std::numeric_limits<uint64_t>::digits - __builtin_clzll(bit_number) - 1;
 	}
-
 	uint8_t nLSB() const {
-		return std::numeric_limits<decltype(bit_number)>::digits - std::bit_width(bit_number);
+		// If the value is 0, return 64
+		if (bit_number == 0) {
+			return 64;
+		}
+
+		return __builtin_ctzll(bit_number);
 	}
 
 	uint64_t bit_number;
@@ -68,20 +81,14 @@ struct Bitboard
 /* Bitboard functions */
 inline Bitboard Rotate180(Bitboard bb)
 {
-	const Bitboard h1 = 0x5555555555555555;
-	const Bitboard h2 = 0x3333333333333333;
-	const Bitboard h4 = 0x0F0F0F0F0F0F0F0F;
-	const Bitboard v1 = 0x00FF00FF00FF00FF;
-	const Bitboard v2 = 0x0000FFFF0000FFFF;
-	const Bitboard m1 = (0xFFFFFFFFFFFFFFFF);
-
-	bb = ((bb >> 1) & h1) | ((bb & h1) << 1);
-	bb = ((bb >> 2) & h2) | ((bb & h2) << 2);
-	bb = ((bb >> 4) & h4) | ((bb & h4) << 4);
-	bb = ((bb >> 8) & v1) | ((bb & v1) << 8);
-	bb = ((bb >> 16) & v2) | ((bb & v2) << 16);
-	bb = (bb >> 32) | (bb << 32);
-	return bb & m1;
+    bb.bit_number = __builtin_bswap64(bb.bit_number);
+    bb.bit_number = ((bb.bit_number >> 1) & 0x5555555555555555) | ((bb.bit_number & 0x5555555555555555) << 1);
+    bb.bit_number = ((bb.bit_number >> 2) & 0x3333333333333333) | ((bb.bit_number & 0x3333333333333333) << 2);
+    bb.bit_number = ((bb.bit_number >> 4) & 0x0F0F0F0F0F0F0F0F) | ((bb.bit_number & 0x0F0F0F0F0F0F0F0F) << 4);
+    bb.bit_number = ((bb.bit_number >> 8) & 0x00FF00FF00FF00FF) | ((bb.bit_number & 0x00FF00FF00FF00FF) << 8);
+    bb.bit_number = ((bb.bit_number >> 16) & 0x0000FFFF0000FFFF) | ((bb.bit_number & 0x0000FFFF0000FFFF) << 16);
+    bb.bit_number = (bb.bit_number >> 32) | (bb.bit_number << 32);
+    return bb;
 }
 
 /* class: BitIterator */
