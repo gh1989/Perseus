@@ -3,6 +3,7 @@
 #include "../src/bitboard.h"
 #include "../src/state.h"
 #include "../src/string_transforms.h"
+#include "../src/move_generation.h"
 
 #define CATCH_CONFIG_MAIN
 
@@ -173,26 +174,55 @@ TEST_CASE("FEN to state conversion", "[state]")
     SECTION("Initial state")
     {
         std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        /*
         State state = StateFromFen(fen);
-        REQUIRE(state.bbs[0] == 0x0000000000000010ULL);  // white knights
-        REQUIRE(state.bbs[1] == 0x0000000000000024ULL);  // white bishops
-        REQUIRE(state.bbs[2] == 0x0000000000000081ULL);  // white rooks
-        REQUIRE(state.bbs[3] == 0x0000000000000008ULL);  // white queen
-        REQUIRE(state.bbs[4] == 0x0000000000000010ULL);  // white king
-        REQUIRE(state.bbs[5] == 0x000000000000FF00ULL);  // white pawns
-        REQUIRE(state.bbs[6] == 0x0000000000001000ULL);  // black knights
-        REQUIRE(state.bbs[7] == 0x0000000000000042ULL);  // black bishops
-        REQUIRE(state.bbs[8] == 0x8100000000000000ULL);  // black rooks
-        REQUIRE(state.bbs[9] == 0x0800000000000000ULL);  // black queen
-        REQUIRE(state.bbs[10] == 0x1000000000000000ULL); // black king
-        REQUIRE(state.bbs[11] == 0x00FF000000000000ULL); // black pawns
+        REQUIRE(state.bbs[0].bit_number == 0x0000000000000042ULL);  // white knights
+        REQUIRE(state.bbs[1].bit_number == 0x0000000000000024ULL);  // white bishops
+        REQUIRE(state.bbs[2].bit_number == 0x0000000000000081ULL);  // white rooks
+        REQUIRE(state.bbs[3].bit_number == 0x0000000000000008ULL);  // white queen
+        REQUIRE(state.bbs[4].bit_number == 0x0000000000000010ULL);  // white king
+        REQUIRE(state.bbs[5].bit_number == 0x000000000000FF00ULL);  // white pawns
+        REQUIRE(state.bbs[6].bit_number == 0x4200000000000000ULL);  // black knights
+        REQUIRE(state.bbs[7].bit_number == 0x2400000000000000ULL);  // black bishops
+        REQUIRE(state.bbs[8].bit_number == 0x8100000000000000ULL);  // black rooks
+        REQUIRE(state.bbs[9].bit_number == 0x0800000000000000ULL);  // black queen
+        REQUIRE(state.bbs[10].bit_number == 0x1000000000000000ULL); // black king
+        REQUIRE(state.bbs[11].bit_number == 0x00FF000000000000ULL); // black pawns
         REQUIRE(state.castle == 15);  // all castling rights
         REQUIRE(state.turn == 0);     // white to move
-        REQUIRE(state.bbs[12] == 0);  // no en passant square
+        REQUIRE(state.bbs[12].bit_number == 0);  // no en passant square
         REQUIRE(state.c50 == 0);      // 50-move rule not applicable
         REQUIRE(state.plies == 0);    // first move
-        */
+    }
+
+    SECTION("Knight check state")
+    {
+        std::string fen = "rnbqkb1r/pppppppp/8/8/8/5n2/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        State state = StateFromFen(fen);
+
+        REQUIRE(state.bbs[KING].bit_number == 0x0000000000000010ULL);  // white king
+        REQUIRE(state.bbs[NUMBER_PIECES+KNIGHT].bit_number == 0x0000000000200000ULL);  // black knights
+    }
+}
+
+TEST_CASE("IsCheck", "[IsCheck]")
+{
+    SECTION("King in check")
+    {
+        State state = StateFromFen("rnbqkb1r/pppppppp/8/8/8/5n2/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        REQUIRE(isCheck(state, true) == true);
+
+        state = StateFromFen("rnbqk1nr/pppppppp/8/8/1b1P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1");
+        REQUIRE(isCheck(state, true) == true);
+    }
+
+    SECTION("King not in check")
+    {
+        State state = StateFromFen("rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
+        REQUIRE(isCheck(state, true) == false);
+
+        state = StateFromFen("rnbqk1nr/pppppppp/8/8/1b6/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        REQUIRE(isCheck(state, true) == false);
+        
     }
 }
 

@@ -143,8 +143,6 @@ State StateFromFen(std::string fen)
 			{
 				const std::string piece_strings = "NBRQKP";
 				found = piece_strings.find(::toupper(c));
-				if (found == std::string::npos)
-					throw std::runtime_error("Bad FEN");
 				auto piece = static_cast<Piece>(found);
 				auto this_piece_colour = (::toupper(c) != c);
 				auto square = static_cast<Square>(8 * (ite - 1) + sub_ite);
@@ -153,14 +151,8 @@ State StateFromFen(std::string fen)
 				sub_ite++;
 			}
 		}
-		if (sub_ite != 8)
-			throw std::runtime_error("Bad FEN");
-
 		ite -= 1;
 	}
-
-	if (ite != 0)
-		throw std::runtime_error("Bad FEN");
 
 	if (castlestring != "-") {
 		uint8_t castlesum = 0;
@@ -184,8 +176,6 @@ State StateFromFen(std::string fen)
 
 	if (fiftycounter != "-") {
 		uint8_t counter = std::stoi(fiftycounter);
-		if (counter >= 999)
-			throw std::runtime_error("Bad FEN");
 		state.c50 = counter;
 	}
 	else
@@ -193,8 +183,6 @@ State StateFromFen(std::string fen)
 
 	if (moveclock != "-") {
 		unsigned short counter = (std::stoi(moveclock) - 1);
-		if (counter > 999)
-			throw std::runtime_error("Bad FEN");
 		state.plies = 2 * counter + state.turn;
 	}
 

@@ -35,7 +35,8 @@ bool isCheck(const State& state, bool turn)
 		auto straights = queens | rooks;
 		if (SquareConnectedToBitboard(thisKingSquare, straights, occupancy&~straights, rook_directions))
 			return true;
-	}
+
+		}
 	return false;
 }
 

@@ -29,11 +29,10 @@ set(SOURCES
     src/test.cpp
     src/move_generation.cpp
     src/string_transforms.cpp
-    src/main.cpp
 )
 
 # Create the executable targets
-add_executable(ChessEngine ${SOURCES})
+add_executable(ChessEngine ${SOURCES} src/main.cpp)
 
 # Add the include directories
 target_include_directories(ChessEngine PUBLIC ${PROJECT_SOURCE_DIR}/src)
@@ -44,10 +43,12 @@ include_directories(${CATCH2_INCLUDE_DIRS})
 
 # Add tests executable
 set(TEST_SOURCES
+    src/string_transforms.h
+    src/string_transforms.cpp
     tests/test_all.cpp
 )
 
-add_executable(tests ${TEST_SOURCES})
+add_executable(tests ${SOURCES} ${TEST_SOURCES})
 target_link_libraries(tests Catch2::Catch2)
 
 # Add a custom test target
