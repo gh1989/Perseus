@@ -105,21 +105,18 @@ std::string AsUci(Move move) {
 }
 
 Bitboard get_en_passant(const std::string& fen) {
-    std::size_t pos = fen.find(" ");
+	std::size_t pos = fen.find(" ");
     pos = fen.find(" ", pos+1);
     pos = fen.find(" ", pos+1);
     if (pos == std::string::npos) {
         return 0;
     }
     std::string ep_square = fen.substr(pos+1, 2);
-    if (ep_square == "-") {
+    if (ep_square == "- ") {
         return 0;
     }
-    std::stringstream ss;
-    ss << std::hex << ep_square;
-    uint64_t ep_square_num;
-    ss >> ep_square_num;
-    return (1ULL << (64 - ep_square_num));
+    uint64_t enPassantIdx = ep_square[0] - 'a' + 8 * (ep_square[1] - '1');
+	return Bitboard(1ULL << enPassantIdx);
 }
 
 int get_fifty_move_count(const std::string& fen) {
@@ -127,15 +124,16 @@ int get_fifty_move_count(const std::string& fen) {
     pos = fen.find(" ", pos+1);
     pos = fen.find(" ", pos+1);
     pos = fen.find(" ", pos+1);
+	std::size_t end = fen.find(" ", pos+1);
     if (pos == std::string::npos) {
         return 0;
     }
-    return std::stoi(fen.substr(pos+1));
+    return std::stoi(fen.substr(pos+1, end));
 }
 
 bool get_turn(const std::string& fen) {
     std::size_t pos = fen.find(" ");
-    return (fen.substr(pos+1, 1) == "w");
+    return (fen.substr(pos+1, 1) != "w");
 }
 
 State StateFromFen(std::string fen) 
@@ -206,8 +204,8 @@ State StateFromFen(std::string fen)
 	}
 
 	state.bbs[2*NUMBER_PIECES] = get_en_passant(fen);
-	//state.c50 = get_fifty_move_count(fen);
-	//state.turn = get_turn(fen);
+	state.c50 = get_fifty_move_count(fen);
+	state.turn = get_turn(fen);
 	
 	// Find the position of the castling part of the FEN string
 	std::size_t castling_pos = fen.find_first_of(' ', pos_end + 1);
@@ -233,11 +231,9 @@ State StateFromFen(std::string fen)
 	}
 
 	// Find the position of the ply part of the FEN string
-	std::size_t ply_pos = fen.find_first_of(' ', castling_pos + 1);
-
-	// Parse the ply count
-	std::string ply_str = fen.substr(castling_pos + 1, ply_pos - castling_pos - 1);
-	//state.plies = std::stoi(ply_str);
+	std::size_t ply_pos = fen.find_last_of(' ');
+	std::string ply_str = fen.substr(ply_pos + 1);
+	state.plies = std::stoi(ply_str);
 
 	return state;
 }

@@ -189,8 +189,8 @@ TEST_CASE("FEN to state conversion", "[state]")
         REQUIRE(state.bbs[11].bit_number == 0x00FF000000000000ULL); // black pawns
         //REQUIRE(state.castle == 15);  // all castling rights
         REQUIRE(state.turn == 0);     // white to move
-        //REQUIRE(state.bbs[12].bit_number == 0);  // no en passant square
-        //REQUIRE(state.c50 == 0);      // 50-move rule not applicable
+        REQUIRE(state.bbs[12].bit_number == 0);  // no en passant square
+        REQUIRE(state.c50 == 0);      // 50-move rule not applicable
         //REQUIRE(state.plies == 0);    // first move
     }
 
@@ -200,7 +200,46 @@ TEST_CASE("FEN to state conversion", "[state]")
         State state = StateFromFen(fen);
 
         REQUIRE(state.bbs[KING].bit_number == 0x10ULL);  // white king
-        REQUIRE(state.bbs[NUMBER_PIECES+KNIGHT].bit_number == 0x200000000200000ULL);  // black knights
+        REQUIRE( state.bbs[NUMBER_PIECES+KNIGHT].bit_number == 0x200000000200000ULL);  // black knights
+    }
+
+    SECTION("Check turn")
+    {
+        State state = StateFromFen("8/2k5/3P4/8/8/8/8/8 b - - 0 1");
+        REQUIRE(state.turn == 1);
+
+        state = StateFromFen("8/2k5/3P4/8/8/8/8/8 w - - 0 1");
+        REQUIRE(state.turn == 0);
+    }
+
+    SECTION("Test enpassant")
+    {
+        State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 0 1");
+        REQUIRE(state.bbs[12].bit_number == squares[e3].bit_number );
+    }
+
+    SECTION("Check c50")
+    {
+        State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 1");
+        REQUIRE(state.c50 == 23 );
+
+        state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 0 1");
+        REQUIRE(state.c50 == 0 );
+
+        state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 100 1");
+        REQUIRE(state.c50 == 100 );
+    }
+
+    SECTION("Check plies")
+    {
+        State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 123");
+        REQUIRE(state.plies == 123 );
+
+        state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 13");
+        REQUIRE(state.plies == 13 );
+
+        state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 9999999");
+        REQUIRE(state.plies == 9999999 );
     }
 }
 
@@ -244,7 +283,7 @@ TEST_CASE("IsCheck", "[IsCheck]")
         state = StateFromFen("8/8/8/3q4/8/8/3K4/8 w - - 0 1");
         REQUIRE(isCheck(state, true) == true);
 
-        state = StateFromFen("8/2k5/3P4/8/8/8/8/8 w - - 0 1");
+        state = StateFromFen("8/2k5/3P4/8/8/8/8/8 b - - 0 1");
         REQUIRE(isCheck(state, false) == true);
     }
 

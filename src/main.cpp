@@ -6,16 +6,14 @@
 
 int main()
 {
-    std::string fen = "k7/4P3/8/1p6/2P5/8/8/7K w - - 0 1";
+    std::string fen = "k7/8/6K1/8/8/8/2PPpN2/2BQr3 w - - 0 1";
     State state = StateFromFen(fen);
     Move moves[64];
-    GenerateMoves(state, moves);
+    std::size_t numMoves = GenerateMoves(state, moves);
 
-    for(int i=0; i<64; i++)
+    for(int i=0; i<numMoves; i++)
     {
         auto move = moves[i];
-        if(move == 0)
-            break;
         std::cout << AsUci(move) << std::endl;
     }
     return 0;
