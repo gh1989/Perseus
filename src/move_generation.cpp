@@ -2,41 +2,38 @@
 #include "move.h"
 #include "move_generation.h"
 
-bool isCheck(const State& state, bool turn)
+bool isCheck(const State& state, bool whiteKing)
 {
 	/* Offset for bitboards */
-	const uint8_t nn = turn * NUMBER_PIECES;
-	const uint8_t not_nn = (!turn)*NUMBER_PIECES;
+	const uint8_t offsetUs = whiteKing ? 0 : NUMBER_PIECES;
+	const uint8_t offsetThem = whiteKing ? NUMBER_PIECES : 0;
 
-	Bitboard thisKing = state.bbs[nn + KING];
-	auto otherKnights = state.bbs[not_nn + KNIGHT];
+	Bitboard ourKing = state.bbs[offsetUs + KING];
+	auto enemyKnights = state.bbs[offsetThem + KNIGHT];
 
-	for (auto sqbb : BitboardRange(thisKing))
-	{
-		auto thisKingSquare = Square(sqbb);
-		if (knight_attacks[thisKingSquare] & otherKnights)
-			return true;
+	Square thisKingSquare = square_lookup.at(ourKing.bit_number);
+	if ((knight_attacks[thisKingSquare] & enemyKnights).bit_number)
+		return true;
 
-		auto thisPawnAttacks = !turn ? pawn_attacks : pawn_attacks_b;
-		auto otherPawns = state.bbs[not_nn + PAWN];
-		if (thisPawnAttacks[thisKingSquare] & otherPawns)
-			return true;
+	auto enemyPawnAttackMask = whiteKing ? pawn_attacks : pawn_attacks_b;
+	auto enemyPawns = state.bbs[offsetThem + PAWN];
+	if (enemyPawnAttackMask[thisKingSquare] & enemyPawns)
+		return true;
 
-		auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
-		Bitboard occupancy = accumulate<>(state.bbs, state.bbs + 12, Bitboard(0), bit_or);
+	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
+	Bitboard occupancy = accumulate<>(state.bbs, state.bbs + 12, Bitboard(0), bit_or);
 
-		auto queens = state.bbs[not_nn + QUEEN];
-		auto bishops = state.bbs[not_nn + BISHOP];
-		auto diagonals = queens | bishops;
-		if (SquareConnectedToBitboard(thisKingSquare, diagonals, occupancy&~diagonals, bishop_directions))
-			return true;
+	auto queens = state.bbs[offsetThem + QUEEN];
+	auto bishops = state.bbs[offsetThem + BISHOP];
+	auto diagonals = queens | bishops;
+	if (SquareConnectedToBitboard(thisKingSquare, diagonals, occupancy&~diagonals, bishop_directions))
+		return true;
 
-		auto rooks = state.bbs[not_nn + ROOK];
-		auto straights = queens | rooks;
-		if (SquareConnectedToBitboard(thisKingSquare, straights, occupancy&~straights, rook_directions))
-			return true;
+	auto rooks = state.bbs[offsetThem + ROOK];
+	auto straights = queens | rooks;
+	if (SquareConnectedToBitboard(thisKingSquare, straights, occupancy&~straights, rook_directions))
+		return true;
 
-		}
 	return false;
 }
 
@@ -53,14 +50,14 @@ size_t GenerateMoves(const State& state, Move * moves) {
 	Bitboard occ = 0;
 	Bitboard occ_b = 0;
 	Bitboard occ_w = 0;
-	for (int i = 0; i < 12; i++)
+	for (int i = 0; i < 2*NUMBER_PIECES; i++)
 	{
 		auto tmp = state.bbs[i];
-		occ = occ | tmp;
-		if (i < 6)
-			occ_w = occ_w | tmp;
+		occ |= occ;
+		if (i < NUMBER_PIECES)
+			occ_w |= tmp;
 		else
-			occ_b = occ_b | tmp;
+			occ_b |= tmp;
 	};
 	auto occ_other = state.turn ? occ_w : occ_b;
 

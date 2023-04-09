@@ -32,6 +32,11 @@ struct Bitboard
 		return Bitboard(bit_number | other.bit_number);
 	}
 
+	Bitboard& operator|=(const Bitboard& other) {
+		bit_number |= other.bit_number;
+		return *this;
+	}
+
 	Bitboard operator& (const Bitboard& other) const {
 		return Bitboard(bit_number & other.bit_number);
 	}

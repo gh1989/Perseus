@@ -104,87 +104,140 @@ std::string AsUci(Move move) {
 	return  ss.str();
 }
 
+Bitboard get_en_passant(const std::string& fen) {
+    std::size_t pos = fen.find(" ");
+    pos = fen.find(" ", pos+1);
+    pos = fen.find(" ", pos+1);
+    if (pos == std::string::npos) {
+        return 0;
+    }
+    std::string ep_square = fen.substr(pos+1, 2);
+    if (ep_square == "-") {
+        return 0;
+    }
+    std::stringstream ss;
+    ss << std::hex << ep_square;
+    uint64_t ep_square_num;
+    ss >> ep_square_num;
+    return (1ULL << (64 - ep_square_num));
+}
+
+int get_fifty_move_count(const std::string& fen) {
+    std::size_t pos = fen.find(" ");
+    pos = fen.find(" ", pos+1);
+    pos = fen.find(" ", pos+1);
+    pos = fen.find(" ", pos+1);
+    if (pos == std::string::npos) {
+        return 0;
+    }
+    return std::stoi(fen.substr(pos+1));
+}
+
+bool get_turn(const std::string& fen) {
+    std::size_t pos = fen.find(" ");
+    return (fen.substr(pos+1, 1) == "w");
+}
+
 State StateFromFen(std::string fen) 
 {
-	const std::string castle_str = "QKqk";
 	State state;
-	std::string strings[6];
-	std::istringstream f(fen);
-	std::string s;
-	int strCount = 0;
-	while (std::getline(f, s, ' ')) {
-		strings[strCount] = s;
-		strCount++;
-		if (strCount == 6) break;
-	}
-
-	if (strCount != 6)
-		throw std::runtime_error("Bad FEN");
-
-	auto posstring = strings[0];
-	auto colour_string = strings[1];
-	auto castlestring = strings[2];
-	auto epstring = strings[3];
-	auto fiftycounter = strings[4];
-	auto moveclock = strings[5];
-
-	auto ite = 8;
-	size_t sub_ite, found;
-
-	std::istringstream f2(posstring);
-	while (std::getline(f2, s, '/')) {
-		sub_ite = 0;
-		for (char& c : s) {
-			if (c >= '1' && c <= '9')
-			{
-				sub_ite += c - '0';
-			}
-			else
-			{
-				const std::string piece_strings = "NBRQKP";
-				found = piece_strings.find(::toupper(c));
-				auto piece = static_cast<Piece>(found);
-				auto this_piece_colour = (::toupper(c) != c);
-				auto square = static_cast<Square>(8 * (ite - 1) + sub_ite);
-				uint8_t pid = this_piece_colour * NUMBER_PIECES + piece;
-				state.bbs[pid] = OnBit(state.bbs[pid], square);
-				sub_ite++;
+	// Find the position of the board part of the FEN string
+	std::size_t pos_end = fen.find(" ");
+	std::size_t rank = 7;
+	std::size_t file = 0;
+	// Go through the board part of the FEN string
+	for (int i = 0; i < pos_end; i++) {
+		char c = fen[i];
+		if (c >= '1' && c <= '8') {
+			// Empty squares
+			file += (c - '0');
+		} else if (c == '/') {
+			// Skip to the next rank
+			rank--;
+			file = 0;
+			continue;
+		} else {
+			// Piece squares
+			Bitboard square = (1ULL << (8*rank+file));
+			file++;
+			switch (c) {
+				case 'P': // White pawn
+					state.bbs[PAWN] |= square;
+					break;
+				case 'N': // White knight
+					state.bbs[KNIGHT] |= square;
+					break;
+				case 'B': // White bishop
+					state.bbs[BISHOP] |= square;
+					break;
+				case 'R': // White rook
+					state.bbs[ROOK] |= square;
+					break;
+				case 'Q': // White queen
+					state.bbs[QUEEN] |= square;
+					break;
+				case 'K': // White king
+					state.bbs[KING] |= square;
+					break;
+				case 'p': // Black pawn
+					state.bbs[NUMBER_PIECES + PAWN] |= square;
+					break;
+				case 'n': // Black knight
+					state.bbs[NUMBER_PIECES + KNIGHT] |= square;
+					break;
+				case 'b': // Black bishop
+					state.bbs[NUMBER_PIECES + BISHOP] |= square;
+					break;
+				case 'r': // Black rook
+					state.bbs[NUMBER_PIECES + ROOK] |= square;
+					break;
+				case 'q': // Black queen
+					state.bbs[NUMBER_PIECES + QUEEN] |= square;
+					break;
+				case 'k': // Black king
+					state.bbs[NUMBER_PIECES + KING] |= square;
+					break;
+				default:
+					// Invalid character, do nothing
+					throw std::runtime_error("Unrecognised piece");
+					break;
 			}
 		}
-		ite -= 1;
 	}
 
-	if (castlestring != "-") {
-		uint8_t castlesum = 0;
-		for (char c : castlestring) {
-			found = castle_str.find(c);
-			if (found != std::string::npos)
-				castlesum += 1 << found;
-		}
-		state.castle = castlesum;
-	}
-	else
+	state.bbs[2*NUMBER_PIECES] = get_en_passant(fen);
+	//state.c50 = get_fifty_move_count(fen);
+	//state.turn = get_turn(fen);
+	
+	// Find the position of the castling part of the FEN string
+	std::size_t castling_pos = fen.find_first_of(' ', pos_end + 1);
+
+	// Check if there are any castling rights
+	if (fen[castling_pos - 1] == '-') {
+		// No castling rights
 		state.castle = 0;
-
-	// 0 for w, 1 for b.
-	state.turn = (colour_string != "w");
-
-	if (epstring != "-")
-		state.bbs[12] = BitboardFromString(epstring);
-	else
-		state.bbs[12] = 0;
-
-	if (fiftycounter != "-") {
-		uint8_t counter = std::stoi(fiftycounter);
-		state.c50 = counter;
+	} else {
+		// Parse the castling rights
+		if (fen.find('K', castling_pos) != std::string::npos) {
+			state.castle |= WK;
+		}
+		if (fen.find('Q', castling_pos) != std::string::npos) {
+			state.castle |= WQ;
+		}
+		if (fen.find('k', castling_pos) != std::string::npos) {
+			state.castle |= BK;
+		}
+		if (fen.find('q', castling_pos) != std::string::npos) {
+			state.castle |= BQ;
+		}
 	}
-	else
-		state.c50 = 0;
 
-	if (moveclock != "-") {
-		unsigned short counter = (std::stoi(moveclock) - 1);
-		state.plies = 2 * counter + state.turn;
-	}
+	// Find the position of the ply part of the FEN string
+	std::size_t ply_pos = fen.find_first_of(' ', castling_pos + 1);
+
+	// Parse the ply count
+	std::string ply_str = fen.substr(castling_pos + 1, ply_pos - castling_pos - 1);
+	//state.plies = std::stoi(ply_str);
 
 	return state;
 }
