@@ -22,13 +22,11 @@ set(SOURCES
     src/move_generation.h
     src/random.h
     src/string_transforms.h
-    src/test.h
     src/types.h
     src/geometry.cpp
     src/move.cpp
     src/square.cpp
     src/state.cpp
-    src/test.cpp
     src/move_generation.cpp
     src/string_transforms.cpp
 )
