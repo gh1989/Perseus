@@ -6,34 +6,40 @@
 #include "state.h"
 #include "types.h"
 
-template<class InputIt, class T, class BinaryOperation>
-constexpr
-T accumulate(InputIt first, InputIt last, T init,
-	BinaryOperation op)
-{
-	for (; first != last; ++first) {
-		init = op(std::move(init), *first); 
-	}
-	return init;
-}
-
 /* Move generation */
 size_t GenerateMoves(const State&, Move* moves );
 
-bool isCheck(const State& state, bool turn);
+size_t PawnMoves(
+	const State& state, 
+	Move* moves, 
+	const Bitboard& pawnBB, 
+	const Bitboard& moveOccupancy, 
+	const Bitboard& enemyOccupancy, 
+	bool whitePieces);
 
+template <Piece _Piece>
 size_t JumperMoves(
     const State& s,
     Move* moves,
-    Piece p,
-    const Bitboard* attacks,
-    const Bitboard& current_occupation);
+	const Bitboard& pieceBB,
+    const Bitboard& moveOccupation );
 
-template <std::size_t NumDirections>
+template <Piece _Piece>
 inline std::size_t SliderMoves(
     const State& state,
     Move* moves,
     const Bitboard& sliderPieces,
-    const std::array<std::pair<int, int>, NumDirections>& directions,
-    const Bitboard& currentOccupancy,
-    const Bitboard& otherOccupancy);
+    const Bitboard& moveOccupancy,
+    const Bitboard& enemyOccupancy);
+
+size_t KingCastling(
+	const State& state,
+	Move *moves,
+	const Bitboard& kingBB,
+	const Bitboard& rookBB,
+	const Bitboard& moveOccupation,
+	const Bitboard& enemyOccupation,
+	bool wPieces);
+
+
+bool isCheck(const State& state, bool whiteKing);
