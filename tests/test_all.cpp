@@ -315,26 +315,17 @@ TEST_CASE("Slider move generation", "[move_generation]") {
 
     SECTION("Rook move generation") {
         auto rookBB = state.bbs[ROOK];
-        REQUIRE( rookBB.bit_number == 0x1001ULL );
         
         // Generate moves for the white rook on a1
          SliderMoves<ROOK>(state, moves, state.bbs[ROOK], moveOccupation, enemyOccupation);
 
-        Move expectedMoves[] = {
+        std::set<Move> expectedMoves = {
             CreateMove(e2, d2), CreateMove(e2, f2), CreateMove(e2, g2), CreateMove(e2, e1), CreateMove(e2, e3), CreateMove(e2, e4),
             CreateMove(e2, e5), CreateMove(e2, e6), CreateMove(e2, e7), CreateMove(e2, e8), 
             CreateMove(a1, b1), CreateMove(a1, c1), CreateMove(a1, d1), CreateMove(a1, e1), CreateMove(a1, f1), CreateMove(a1, g1), CreateMove(a1, h1)
         };
-/*
-        for (int i = 0; i < 17; i++) {
-            auto foundMove = std::find(std::begin(expectedMoves), std::end(expectedMoves), moves[i]) != std::end(expectedMoves);
-            REQUIRE( foundMove );
-            //std::cout << AsUci(foundMove) << std::endl;
-        }
 
-        std::cout << numMoves << std::endl;
-        REQUIRE(numMoves == 17);
-        */
+        REQUIRE( std::set<Move>(moves) == expectedMoves );
     }
 }
 

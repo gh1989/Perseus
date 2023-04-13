@@ -82,17 +82,14 @@ void PawnMoves(
 			if (rank == dblPushRnk)
 			{
 				push_twice = squares[sqr + pawn_off_2];
-				if (!(push_twice & fullOccupancy)) {
+				if (!(push_twice & fullOccupancy))
 					moves.emplace_back(CreateMove(sqr, Square(sqr + pawn_off_2)));
-				}
 			}
 			if (promote_cond)
-				for (auto& prom : promote_pieces) {
+				for (auto& prom : promote_pieces) 
 					moves.emplace_back(CreatePromotion(sqr, Square(sqr + pawn_off_1), prom));
-				}
-			else {
+			else
 				moves.emplace_back(CreateMove(sqr, Square(sqr + pawn_off_1)));
-			}
 		}
 
 		if (cpattacks[sqr] & (enemyOccupancy | state.bbs[id_ep]))
@@ -114,20 +111,14 @@ void PawnMoves(
 					// Promotion
 					if (promote_cond)
 						for (auto& prom : promote_pieces)
-						{
 							moves.emplace_back(CreatePromotion(sqr, to, prom));
-						}
 					else
 					{
 						// Taking enpassant
 						if (cpattacks[sqr] & state.bbs[id_ep])
-						{
 							moves.emplace_back(CreateEnPassant(sqr, to));
-						}
 						else
-						{
 							moves.emplace_back(CreateMove(sqr, to));
-						}
 					}
 				}
 			}
@@ -176,10 +167,8 @@ void JumperMoves(
         Square sqr = Square(sqbb);
         Bitboard square = squares[sqr];
         const auto& attack = attacks[sqr] & (~moveOccupation);
-        std::transform(BitboardRange(attack).begin(), BitboardRange(attack).end(), std::back_inserter(moves),
-            [&](auto sqbb2) {
-                return CreateMove(sqr, Square(sqbb2));
-            });
+		for(auto knightJumpSqIdx : BitboardRange(attack))
+			moves.emplace_back(CreateMove(sqr, Square(knightJumpSqIdx)));
     }
 }
 
@@ -204,18 +193,25 @@ inline void SliderMoves(
             int dy = dir.second;
             int sidx = sliderSquare;
             int rank = sidx / 8;
-            for (; (dx > 0 && rank < 7) || (dx < 0 && rank > 0) || (dy > 0 && sidx % 8 < 7) || (dy < 0 && sidx % 8 > 0); sidx += 8 * dx + dy, rank += dx)
-            {
+			while( true )
+			{
+				sidx += 8 * dx + dy;
+				rank += dx;
+
+				if ((dx > 0 && rank > 7) || (dx < 0 && rank < 0) || (dy > 0 && sidx % 8 > 7) || (dy < 0 && sidx % 8 < 0))
+					break;
                 if (sidx < 0 || sidx > 63)
                     break;
 
                 Bitboard newSquareBB = squares[sidx];
 
-                if ((newSquareBB & moveOccupancy).bit_number)
+				// Hit obstacle - break
+                if (newSquareBB & moveOccupancy)
                     break;
 
                 moves.emplace_back(CreateMove(Square(sliderSquare), Square(sidx)));
 
+				// Hit enemy last - break
                 if (newSquareBB & enemyOccupancy)
                     break;
             }
