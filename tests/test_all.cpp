@@ -325,7 +325,8 @@ TEST_CASE("Slider move generation", "[move_generation]") {
             CreateMove(a1, b1), CreateMove(a1, c1), CreateMove(a1, d1), CreateMove(a1, e1), CreateMove(a1, f1), CreateMove(a1, g1), CreateMove(a1, h1)
         };
 
-        REQUIRE( std::set<Move>(moves) == expectedMoves );
+        std::set<Move> movesGenerated = std::set( moves.begin(), moves.end() );
+        REQUIRE( movesGenerated == expectedMoves );
     }
 }
 
