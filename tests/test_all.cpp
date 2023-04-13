@@ -1,5 +1,7 @@
 #include <catch2/catch_all.hpp>
 #include <iostream>
+#include <numeric>
+
 #include "../src/bitboard.h"
 #include "../src/state.h"
 #include "../src/string_transforms.h"
@@ -302,6 +304,40 @@ TEST_CASE("IsCheck", "[IsCheck]")
         REQUIRE(isCheck(state, true) == false);
     }
 }
+
+TEST_CASE("Slider move generation", "[move_generation]") {
+    State state = StateFromFen("8/8/8/8/8/8/K2pR2P/R7 w - - 0 1");
+
+	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
+	Bitboard moveOccupation = std::accumulate<>(state.bbs, state.bbs + NUMBER_PIECES, Bitboard(0), bit_or);
+	Bitboard enemyOccupation = std::accumulate<>(state.bbs + NUMBER_PIECES, state.bbs + 2 * NUMBER_PIECES, Bitboard(0), bit_or);
+	TMoveContainer moves;
+
+    SECTION("Rook move generation") {
+        auto rookBB = state.bbs[ROOK];
+        REQUIRE( rookBB.bit_number == 0x1001ULL );
+        
+        // Generate moves for the white rook on a1
+         SliderMoves<ROOK>(state, moves, state.bbs[ROOK], moveOccupation, enemyOccupation);
+
+        Move expectedMoves[] = {
+            CreateMove(e2, d2), CreateMove(e2, f2), CreateMove(e2, g2), CreateMove(e2, e1), CreateMove(e2, e3), CreateMove(e2, e4),
+            CreateMove(e2, e5), CreateMove(e2, e6), CreateMove(e2, e7), CreateMove(e2, e8), 
+            CreateMove(a1, b1), CreateMove(a1, c1), CreateMove(a1, d1), CreateMove(a1, e1), CreateMove(a1, f1), CreateMove(a1, g1), CreateMove(a1, h1)
+        };
+/*
+        for (int i = 0; i < 17; i++) {
+            auto foundMove = std::find(std::begin(expectedMoves), std::end(expectedMoves), moves[i]) != std::end(expectedMoves);
+            REQUIRE( foundMove );
+            //std::cout << AsUci(foundMove) << std::endl;
+        }
+
+        std::cout << numMoves << std::endl;
+        REQUIRE(numMoves == 17);
+        */
+    }
+}
+
 
 int main(int argc, char* argv[]) {
     // This line starts the Catch2 test runner

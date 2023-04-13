@@ -1,16 +1,17 @@
 #include <numeric>
+
 #include "geometry.h"
 #include "move.h"
 #include "move_generation.h"
 
 /* Move generation */
-size_t GenerateMoves(const State& state, Move * moves) {
+TMoveContainer GenerateMoves(const State& state) {
 
-	size_t numMoves = 0;
+	TMoveContainer moves;
 
 	/* Offset for moving/enemy bitboards */
-	const uint8_t pieceStart = state.turn * NUMBER_PIECES;
-	const uint8_t enemyPieceStart = (!state.turn) * NUMBER_PIECES;
+	const uint8_t pieceStart = state.turn ?  0 : NUMBER_PIECES;
+	const uint8_t enemyPieceStart = state.turn ? NUMBER_PIECES : 0;
 	bool whitePieces = !state.turn;
 	
 	/* Occupation */
@@ -20,46 +21,38 @@ size_t GenerateMoves(const State& state, Move * moves) {
 	
 	/* Pawn moves */
 	auto pawnBB = state.bbs[pieceStart + PAWN];
-	size_t pawnMoves = PawnMoves(state, moves, pawnBB, moveOccupation, enemyOccupation, whitePieces);
-	moves += pawnMoves;
+	PawnMoves(state, moves, pawnBB, moveOccupation, enemyOccupation, whitePieces);
 
 	/* Knight */
 	auto knightBB = state.bbs[pieceStart + KNIGHT];
-	size_t knightMoves = JumperMoves<KNIGHT>(state, moves, knightBB, moveOccupation);
-	moves += knightMoves;
+	JumperMoves<KNIGHT>(state, moves, knightBB, moveOccupation);
 
 	/* Bishop */
 	auto queenBB = state.bbs[pieceStart + QUEEN];
 	auto bishopBB = state.bbs[pieceStart + BISHOP];
 	auto beeshopBB = queenBB | bishopBB;
-	size_t bishopMoves = SliderMoves<BISHOP>(state, moves, beeshopBB, moveOccupation, enemyOccupation);
-	moves += bishopMoves;
+	SliderMoves<BISHOP>(state, moves, beeshopBB, moveOccupation, enemyOccupation);
 
 	/* Rook */
 	Bitboard rookBB = state.bbs[pieceStart + ROOK];
 	auto theRookBB = rookBB | queenBB;
-	size_t rookMoves = SliderMoves<ROOK>(state, moves, theRookBB, moveOccupation, enemyOccupation);
-	moves += rookMoves;
+	SliderMoves<ROOK>(state, moves, theRookBB, moveOccupation, enemyOccupation);
 
 	/* King */
 	auto kingBB = state.bbs[pieceStart + KING];
-	size_t kingMoves = JumperMoves<KING>(state, moves, kingBB, moveOccupation);
-	kingMoves += KingCastling(state, moves, kingBB, rookBB, moveOccupation, enemyOccupation, whitePieces);
-	moves += kingMoves;
-	
-	return pawnMoves + kingMoves + rookMoves + bishopMoves + knightMoves;
+	JumperMoves<KING>(state, moves, kingBB, moveOccupation);
+	KingCastling(state, moves, kingBB, rookBB, moveOccupation, enemyOccupation, whitePieces);
 }
 
-size_t PawnMoves(
+void PawnMoves(
 	const State& state, 
-	Move* moves, 
+	TMoveContainer &moves, 
 	const Bitboard& pawnBB, 
 	const Bitboard& moveOccupancy, 
 	const Bitboard& enemyOccupancy, 
 	bool whitePieces)
 {
 	/* Pawn moves: without rotation */
-	size_t numMoves = 0;
 	Bitboard square, push_once, push_twice, capt_diag;
 	const size_t id_ep = 12;
 			
@@ -90,18 +83,15 @@ size_t PawnMoves(
 			{
 				push_twice = squares[sqr + pawn_off_2];
 				if (!(push_twice & fullOccupancy)) {
-					*moves++ = CreateMove(sqr, Square(sqr + pawn_off_2));
-					numMoves++;
+					moves.emplace_back(CreateMove(sqr, Square(sqr + pawn_off_2)));
 				}
 			}
 			if (promote_cond)
 				for (auto& prom : promote_pieces) {
-					*moves++ = CreatePromotion(sqr, Square(sqr + pawn_off_1), prom);
-					numMoves++;
+					moves.emplace_back(CreatePromotion(sqr, Square(sqr + pawn_off_1), prom));
 				}
 			else {
-				*moves++ = CreateMove(sqr, Square(sqr + pawn_off_1));
-				numMoves++;
+				moves.emplace_back(CreateMove(sqr, Square(sqr + pawn_off_1)));
 			}
 		}
 
@@ -125,67 +115,55 @@ size_t PawnMoves(
 					if (promote_cond)
 						for (auto& prom : promote_pieces)
 						{
-							*moves++ = CreatePromotion(sqr, to, prom);
-							numMoves++;
+							moves.emplace_back(CreatePromotion(sqr, to, prom));
 						}
 					else
 					{
 						// Taking enpassant
 						if (cpattacks[sqr] & state.bbs[id_ep])
 						{
-							*moves++ = CreateEnPassant(sqr, to);
-							numMoves++;
+							moves.emplace_back(CreateEnPassant(sqr, to));
 						}
 						else
 						{
-							*moves++ = CreateMove(sqr, to);
-							numMoves++;
+							moves.emplace_back(CreateMove(sqr, to));
 						}
 					}
 				}
 			}
 	}
-
-	return numMoves;
 }
 
-size_t KingCastling(
+void KingCastling(
 	const State& state,
-	Move *moves,
+	TMoveContainer &moves,
 	const Bitboard& kingBB,
 	const Bitboard& rookBB,
 	const Bitboard& moveOccupation,
 	const Bitboard& enemyOccupation,
 	bool wPieces)
 {
-	size_t kingMoves = 0;
 	auto kingStart  = wPieces ? e1 : e8;
 	
 	auto kCastleEnd = wPieces ? g1 : g8;
 	auto ksCastling = wPieces ? Castling::WK : Castling::BK;
 	auto kRookStart = wPieces ? h1 : h8;
 	if ((rookBB & squares[kRookStart]) && (state.castle & ksCastling ))
-	{
-		*moves++ = CreateCastle(kingStart, kCastleEnd);
-		kingMoves++;
-	}
+		moves.emplace_back(CreateMove(kingStart, kCastleEnd));
 
 	auto qsCastling = wPieces ? Castling::WQ : Castling::BQ;
 	auto qCastleEnd = wPieces ? c1 : c8;
 	auto qRookStart = wPieces ? a1 : a8;
 	if ((rookBB & squares[qRookStart]) && (state.castle & qsCastling ))
 	{
-		*moves++ = CreateCastle(kingStart, qCastleEnd);
-		kingMoves++;
+		moves.emplace_back(CreateMove(kingStart, qCastleEnd));
 	}
-
-	return kingMoves;
 }
 
 template <Piece _Piece>
-size_t JumperMoves(
+void JumperMoves(
     const State& s,
-    Move* moves,
+    TMoveContainer &moves,
 	const Bitboard& pieceBB,
     const Bitboard& moveOccupation )
 {
@@ -193,33 +171,26 @@ size_t JumperMoves(
 	if(_Piece == KING)
 		attacks = neighbours;
 
-    size_t numMoves = 0;
     for (const auto& sqbb : BitboardRange(pieceBB))
     {
         Square sqr = Square(sqbb);
         Bitboard square = squares[sqr];
         const auto& attack = attacks[sqr] & (~moveOccupation);
-        std::transform(BitboardRange(attack).begin(), BitboardRange(attack).end(), moves,
+        std::transform(BitboardRange(attack).begin(), BitboardRange(attack).end(), std::back_inserter(moves),
             [&](auto sqbb2) {
                 return CreateMove(sqr, Square(sqbb2));
             });
-        numMoves += attack.PopCnt();
-        moves += attack.PopCnt();
     }
-
-    return numMoves;
 }
 
 template <Piece _Piece>
-inline std::size_t SliderMoves(
+inline void SliderMoves(
     const State& state,
-    Move* moves,
+    TMoveContainer &moves,
     const Bitboard& sliderPieces,
     const Bitboard& moveOccupancy,
     const Bitboard& enemyOccupancy)
 {
-    std::size_t numMoves = 0;
-	
 	auto directions = bishop_directions;
 	if(_Piece == ROOK)
 		directions = rook_directions;
@@ -240,18 +211,16 @@ inline std::size_t SliderMoves(
 
                 Bitboard newSquareBB = squares[sidx];
 
-                if (newSquareBB & moveOccupancy)
+                if ((newSquareBB & moveOccupancy).bit_number)
                     break;
 
-                *moves++ = CreateMove(Square(sliderSquare), Square(sidx));
-                numMoves++;
+                moves.emplace_back(CreateMove(Square(sliderSquare), Square(sidx)));
 
                 if (newSquareBB & enemyOccupancy)
                     break;
             }
         }
     }
-    return numMoves;
 }
 
 bool isCheck(const State& state, bool whitePieces)

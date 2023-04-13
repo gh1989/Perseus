@@ -1,45 +1,48 @@
 #pragma once
 
+#include <list>
+
 #include "bitboard.h"
 #include "geometry.h"
 #include "move.h"
 #include "state.h"
 #include "types.h"
 
-/* Move generation */
-size_t GenerateMoves(const State&, Move* moves );
+typedef std::list<Move> TMoveContainer;
 
-size_t PawnMoves(
-	const State& state, 
-	Move* moves, 
-	const Bitboard& pawnBB, 
-	const Bitboard& moveOccupancy, 
-	const Bitboard& enemyOccupancy, 
+/* Move generation */
+TMoveContainer GenerateMoves(const State&);
+
+void PawnMoves(
+	const State& state,
+	TMoveContainer &moves,
+	const Bitboard& pawnBB,
+	const Bitboard& moveOccupancy,
+	const Bitboard& enemyOccupancy,
 	bool whitePieces);
 
 template <Piece _Piece>
-size_t JumperMoves(
-    const State& s,
-    Move* moves,
+void JumperMoves(
+    const State& state,
+	TMoveContainer &moves,
 	const Bitboard& pieceBB,
-    const Bitboard& moveOccupation );
+    const Bitboard& moveOccupation);
 
 template <Piece _Piece>
-inline std::size_t SliderMoves(
+void SliderMoves(
     const State& state,
-    Move* moves,
+	TMoveContainer &moves,
     const Bitboard& sliderPieces,
     const Bitboard& moveOccupancy,
     const Bitboard& enemyOccupancy);
 
-size_t KingCastling(
+void KingCastling(
 	const State& state,
-	Move *moves,
+	TMoveContainer &moves,
 	const Bitboard& kingBB,
 	const Bitboard& rookBB,
 	const Bitboard& moveOccupation,
 	const Bitboard& enemyOccupation,
 	bool wPieces);
-
 
 bool isCheck(const State& state, bool whiteKing);

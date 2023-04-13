@@ -6,15 +6,13 @@
 
 int main()
 {
-    std::string fen = "k7/8/6K1/8/8/8/2PPpN2/2BQr3 w - - 0 1";
+    std::string fen = "8/8/8/8/8/8/K2pR2P/R7 w - - 0 1";
     State state = StateFromFen(fen);
-    Move moves[64];
-    std::size_t numMoves = GenerateMoves(state, moves);
+    auto moves = GenerateMoves(state);
 
-    for(int i=0; i<numMoves; i++)
+    for(auto m : moves)
     {
-        auto move = moves[i];
-        std::cout << AsUci(move) << std::endl;
+        std::cout << AsUci(m) << std::endl;
     }
     return 0;
 }
