@@ -328,6 +328,46 @@ TEST_CASE("Slider move generation", "[move_generation]") {
         std::set<Move> movesGenerated = std::set( moves.begin(), moves.end() );
         REQUIRE( movesGenerated == expectedMoves );
     }
+
+    SECTION("Bishop move generation") {
+        std::string fenString = "rnbqkbnr/pppppppp/8/8/4B3/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        auto state = StateFromFen(fenString);
+        auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
+	    Bitboard moveOccupation = std::accumulate<>(state.bbs, state.bbs + NUMBER_PIECES, Bitboard(0), bit_or);
+	    Bitboard enemyOccupation = std::accumulate<>(state.bbs + NUMBER_PIECES, state.bbs + 2 * NUMBER_PIECES, Bitboard(0), bit_or);
+	    TMoveContainer moves;
+
+        // Generate moves for the white bishop on e4
+        SliderMoves<BISHOP>(state, moves, state.bbs[BISHOP], moveOccupation, enemyOccupation);
+
+        std::set<Move> expectedMoves = {
+            CreateMove(e4, f5), CreateMove(e4, g6), CreateMove(e4, h7), CreateMove(e4, d3),
+            CreateMove(e4, f3), CreateMove(e4, d5), CreateMove(e4, c6), CreateMove(e4, b7),
+        };
+
+        std::set<Move> movesGenerated = std::set(moves.begin(), moves.end());
+        REQUIRE(movesGenerated == expectedMoves);
+    }
+
+    SECTION("Test king castling")
+    {
+        auto state = StateFromFen("rnbqkbnr/pppppppp/8/8/4B3/8/PPPPPPPP/R3K2R w KQkq - 0 1");
+        Bitboard moveOccupation = std::accumulate<>(state.bbs, state.bbs + NUMBER_PIECES, Bitboard(0), bit_or);
+	    Bitboard enemyOccupation = std::accumulate<>(state.bbs + NUMBER_PIECES, state.bbs + 2 * NUMBER_PIECES, Bitboard(0), bit_or);
+	    TMoveContainer moves;
+
+         // Generate moves for the white bishop on e4
+        auto kingBB = state.bbs[KING];
+        auto rookBB = state.bbs[ROOK];
+        KingCastling(state, moves, kingBB, rookBB, moveOccupation, enemyOccupation, true);
+
+        std::set<Move> expectedMoves = {
+            CreateMove(e1, g1), CreateMove(e1, c1)
+        };
+
+        std::set<Move> movesGenerated = std::set(moves.begin(), moves.end());
+        REQUIRE(movesGenerated == expectedMoves);
+    }
 }
 
 

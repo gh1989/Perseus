@@ -158,10 +158,7 @@ void JumperMoves(
 	const Bitboard& pieceBB,
     const Bitboard& moveOccupation )
 {
-	auto attacks = knight_attacks;
-	if(_Piece == KING)
-		attacks = neighbours;
-
+	auto attacks = _Piece == KNIGHT ? knight_attacks : neighbours;
     for (const auto& sqbb : BitboardRange(pieceBB))
     {
         Square sqr = Square(sqbb);
@@ -180,10 +177,7 @@ inline void SliderMoves(
     const Bitboard& moveOccupancy,
     const Bitboard& enemyOccupancy)
 {
-	auto directions = bishop_directions;
-	if(_Piece == ROOK)
-		directions = rook_directions;
-
+	auto directions = _Piece == BISHOP ? bishop_directions : rook_directions;
     for (auto sliderSquare : BitboardRange(sliderPieces))
     {
         Bitboard squareBB = squares[sliderSquare];
