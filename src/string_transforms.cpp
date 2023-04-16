@@ -18,8 +18,9 @@ void PrettyPrint(const State& state)
 
 	for (int i = 0; i < NUMBER_PIECES; ++i)
 	{
-		Bitboard wocc = state.bbs[i];
-		Bitboard bocc = state.bbs[NUMBER_PIECES + i];
+		// requires knowledge of implementation in state. Bad
+		Bitboard wocc = state.getBitboard(i);
+		Bitboard bocc = state.getBitboard(i+NUMBER_PIECES); 
 		Piece piece = static_cast<Piece>(i);
 		for (int i = 0; i < 64; i++)
 		{
@@ -48,7 +49,7 @@ void PrettyPrint(const State& state)
 	}
 
 	std::cout << output;
-	Bitboard ep = state.bbs[12];
+	Bitboard ep = state.getBitboard(12);
 
 	if (ep)
 	{
@@ -60,8 +61,8 @@ void PrettyPrint(const State& state)
 		}
 		std::cout << std::endl;
 	}
-	std::cout << "fiftycounter: " << state.c50 << std::endl;
-	int castlerights = state.castle;
+	std::cout << "fiftycounter: " << state.getMoveCount() << std::endl;
+	int castlerights = state.getCastleRights();
 	const std::string crights = "QKqk";
 	std::cout << "castlerights: " << castlerights << " ";
 	for (char c : crights)
@@ -72,8 +73,8 @@ void PrettyPrint(const State& state)
 	}
 
 	std::cout << std::endl;
-	std::cout << "plies: " << state.plies << std::endl;
-	std::cout << "colour to move: " << (!state.turn ? "white" : "black") << std::endl;
+	std::cout << "plies: " << state.getPlies() << std::endl;
+	std::cout << "colour to move: " << (!state.isBlackMove() ? "white" : "black") << std::endl;
 }
 
 // Get square name as string
@@ -158,54 +159,25 @@ State StateFromFen(std::string fen)
 			// Piece squares
 			Bitboard square = (1ULL << (8*rank+file));
 			file++;
-			switch (c) {
-				case 'P': // White pawn
-					state.bbs[PAWN] |= square;
-					break;
-				case 'N': // White knight
-					state.bbs[KNIGHT] |= square;
-					break;
-				case 'B': // White bishop
-					state.bbs[BISHOP] |= square;
-					break;
-				case 'R': // White rook
-					state.bbs[ROOK] |= square;
-					break;
-				case 'Q': // White queen
-					state.bbs[QUEEN] |= square;
-					break;
-				case 'K': // White king
-					state.bbs[KING] |= square;
-					break;
-				case 'p': // Black pawn
-					state.bbs[NUMBER_PIECES + PAWN] |= square;
-					break;
-				case 'n': // Black knight
-					state.bbs[NUMBER_PIECES + KNIGHT] |= square;
-					break;
-				case 'b': // Black bishop
-					state.bbs[NUMBER_PIECES + BISHOP] |= square;
-					break;
-				case 'r': // Black rook
-					state.bbs[NUMBER_PIECES + ROOK] |= square;
-					break;
-				case 'q': // Black queen
-					state.bbs[NUMBER_PIECES + QUEEN] |= square;
-					break;
-				case 'k': // Black king
-					state.bbs[NUMBER_PIECES + KING] |= square;
-					break;
-				default:
-					// Invalid character, do nothing
-					throw std::runtime_error("Unrecognised piece");
-					break;
-			}
+
+			bool _whitePiece = !std::islower(c);
+			auto C = std::toupper(c);
+			Piece pieceLookup[256] = {
+    			['P'] = PAWN,
+    			['N'] = KNIGHT,
+   				['B'] = BISHOP,
+   				['R'] = ROOK,
+   				['Q'] = QUEEN,
+    			['K'] = KING
+			};
+			Piece _piece = pieceLookup[C]; 
+			state.addToBitboard(_whitePiece*NUMBER_PIECES+_piece, square );
 		}
 	}
 
-	state.bbs[2*NUMBER_PIECES] = get_en_passant(fen);
-	state.c50 = get_fifty_move_count(fen);
-	state.turn = get_turn(fen);
+	state.setBitboard(12, get_en_passant(fen));
+	state.setMoveCount( get_fifty_move_count(fen) );
+	state.setBlackMove( get_turn(fen) );
 	
 	// Find the position of the castling part of the FEN string
 	std::size_t castling_pos = fen.find_first_of(' ', pos_end + 1);
@@ -213,27 +185,29 @@ State StateFromFen(std::string fen)
 	// Check if there are any castling rights
 	if (fen[castling_pos - 1] == '-') {
 		// No castling rights
-		state.castle = 0;
+		state.setCastleRights(0);
 	} else {
+		auto castle = 0;
 		// Parse the castling rights
 		if (fen.find('K', castling_pos) != std::string::npos) {
-			state.castle |= WK;
+			castle |= WK;
 		}
 		if (fen.find('Q', castling_pos) != std::string::npos) {
-			state.castle |= WQ;
+			castle |= WQ;
 		}
 		if (fen.find('k', castling_pos) != std::string::npos) {
-			state.castle |= BK;
+			castle |= BK;
 		}
 		if (fen.find('q', castling_pos) != std::string::npos) {
-			state.castle |= BQ;
+			castle |= BQ;
 		}
+		state.setCastleRights(castle);
 	}
 
 	// Find the position of the ply part of the FEN string
 	std::size_t ply_pos = fen.find_last_of(' ');
 	std::string ply_str = fen.substr(ply_pos + 1);
-	state.plies = std::stoi(ply_str);
+	state.setPlies( std::stoi(ply_str) );
 
 	return state;
 }

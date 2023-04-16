@@ -1,6 +1,5 @@
 #include <catch2/catch_all.hpp>
 #include <iostream>
-#include <numeric>
 
 #include "../src/bitboard.h"
 #include "../src/state.h"
@@ -177,23 +176,23 @@ TEST_CASE("FEN to state conversion", "[state]")
     {
         std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         State state = StateFromFen(fen);
-        REQUIRE(state.bbs[0].bit_number == 0x0000000000000042ULL);  // white knights
-        REQUIRE(state.bbs[1].bit_number == 0x0000000000000024ULL);  // white bishops
-        REQUIRE(state.bbs[2].bit_number == 0x0000000000000081ULL);  // white rooks
-        REQUIRE(state.bbs[3].bit_number == 0x0000000000000008ULL);  // white queen
-        REQUIRE(state.bbs[4].bit_number == 0x0000000000000010ULL);  // white king
-        REQUIRE(state.bbs[5].bit_number == 0x000000000000FF00ULL);  // white pawns
-        REQUIRE(state.bbs[6].bit_number == 0x4200000000000000ULL);  // black knights
-        REQUIRE(state.bbs[7].bit_number == 0x2400000000000000ULL);  // black bishops
-        REQUIRE(state.bbs[8].bit_number == 0x8100000000000000ULL);  // black rooks
-        REQUIRE(state.bbs[9].bit_number == 0x0800000000000000ULL);  // black queen
-        REQUIRE(state.bbs[10].bit_number == 0x1000000000000000ULL); // black king
-        REQUIRE(state.bbs[11].bit_number == 0x00FF000000000000ULL); // black pawns
-        //REQUIRE(state.castle == 15);  // all castling rights
-        REQUIRE(state.turn == 0);     // white to move
-        REQUIRE(state.bbs[12].bit_number == 0);  // no en passant square
-        REQUIRE(state.c50 == 0);      // 50-move rule not applicable
-        //REQUIRE(state.plies == 0);    // first move
+        REQUIRE(state.getBitboard(0).bit_number == 0x0000000000000042ULL);  // white knights
+        REQUIRE(state.getBitboard(1).bit_number == 0x0000000000000024ULL);  // white bishops
+        REQUIRE(state.getBitboard(2).bit_number == 0x0000000000000081ULL);  // white rooks
+        REQUIRE(state.getBitboard(3).bit_number == 0x0000000000000008ULL);  // white queen
+        REQUIRE(state.getBitboard(4).bit_number == 0x0000000000000010ULL);  // white king
+        REQUIRE(state.getBitboard(5).bit_number == 0x000000000000FF00ULL);  // white pawns
+        REQUIRE(state.getBitboard(6).bit_number == 0x4200000000000000ULL);  // black knights
+        REQUIRE(state.getBitboard(7).bit_number == 0x2400000000000000ULL);  // black bishops
+        REQUIRE(state.getBitboard(8).bit_number == 0x8100000000000000ULL);  // black rooks
+        REQUIRE(state.getBitboard(9).bit_number == 0x0800000000000000ULL);  // black queen
+        REQUIRE(state.getBitboard(10).bit_number == 0x1000000000000000ULL); // black king
+        REQUIRE(state.getBitboard(11).bit_number == 0x00FF000000000000ULL); // black pawns
+        REQUIRE(state.getCastleRights() == 15);  // all castling rights
+        REQUIRE(state.isBlackMove() == 0);     // white to move
+        REQUIRE(state.getEnPassant().bit_number == 0);  // no en passant square
+        REQUIRE(state.getMoveCount() == 0);      // 50-move rule not applicable
+        REQUIRE(state.getPlies() == 0);    // first move
     }
 
     SECTION("Knight check state")
@@ -201,47 +200,47 @@ TEST_CASE("FEN to state conversion", "[state]")
         std::string fen = "rnbqkb1r/pppppppp/8/8/8/5n2/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         State state = StateFromFen(fen);
 
-        REQUIRE(state.bbs[KING].bit_number == 0x10ULL);  // white king
-        REQUIRE( state.bbs[NUMBER_PIECES+KNIGHT].bit_number == 0x200000000200000ULL);  // black knights
+        REQUIRE(state.whitePiece<KING>().bit_number == 0x10ULL);  // white king
+        REQUIRE( state.blackPiece<KNIGHT>().bit_number == 0x200000000200000ULL);  // black knights
     }
 
     SECTION("Check turn")
     {
         State state = StateFromFen("8/2k5/3P4/8/8/8/8/8 b - - 0 1");
-        REQUIRE(state.turn == 1);
+        REQUIRE(state.isBlackMove() == 1);
 
         state = StateFromFen("8/2k5/3P4/8/8/8/8/8 w - - 0 1");
-        REQUIRE(state.turn == 0);
+        REQUIRE(state.isBlackMove() == 0);
     }
 
     SECTION("Test enpassant")
     {
         State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 0 1");
-        REQUIRE(state.bbs[12].bit_number == squares[e3].bit_number );
+        REQUIRE(state.getEnPassant().bit_number == squares[e3].bit_number );
     }
 
     SECTION("Check c50")
     {
         State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 1");
-        REQUIRE(state.c50 == 23 );
+        REQUIRE(state.getMoveCount() == 23 );
 
         state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 0 1");
-        REQUIRE(state.c50 == 0 );
+        REQUIRE(state.getMoveCount() == 0 );
 
         state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 100 1");
-        REQUIRE(state.c50 == 100 );
+        REQUIRE(state.getMoveCount() == 100 );
     }
 
     SECTION("Check plies")
     {
         State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 123");
-        REQUIRE(state.plies == 123 );
+        REQUIRE(state.getPlies() == 123 );
 
         state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 13");
-        REQUIRE(state.plies == 13 );
+        REQUIRE(state.getPlies() == 13 );
 
         state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 9999999");
-        REQUIRE(state.plies == 9999999 );
+        REQUIRE(state.getPlies() == 9999999 );
     }
 }
 
@@ -250,16 +249,16 @@ TEST_CASE("Knight bit boards from FEN strings", "[state]") {
     SECTION("Knight checkmate") {
         std::string fen = "7k/8/8/8/8/8/3N4/K7 w - - 0 1";
         State state = StateFromFen(fen);
-        REQUIRE(state.bbs[KNIGHT].bit_number                == 0x0000000000000800ULL);  // white knights
-        REQUIRE(state.bbs[NUMBER_PIECES+KING].bit_number    == 0x8000000000000000ULL);  // black KING
-        REQUIRE(state.bbs[KNIGHT].bit_number  == 0x0000000000000800ULL);  // black knights
+        REQUIRE(state.whitePiece<KNIGHT>().bit_number                == 0x0000000000000800ULL);  // white knights
+        REQUIRE(state.blackPiece<KING>().bit_number    == 0x8000000000000000ULL);  // black KING
+        REQUIRE(state.blackPiece<KNIGHT>().bit_number  == 0x0000000000000800ULL);  // black knights
     }
 
     SECTION("Knight stalemate") {
         std::string fen = "8/8/8/8/8/8/8/K1N5 w - - 0 1";
         State state = StateFromFen(fen);
-        REQUIRE(state.bbs[KNIGHT].bit_number == 0x0000000000000004ULL);  // white knights
-        REQUIRE(state.bbs[KING].bit_number   == 0x0000000000000001ULL);  // white king
+        REQUIRE(state.whitePiece<KNIGHT>().bit_number == 0x0000000000000004ULL);  // white knights
+        REQUIRE(state.whitePiece<KING>().bit_number   == 0x0000000000000001ULL);  // white king
     }
 }
 
@@ -307,17 +306,13 @@ TEST_CASE("IsCheck", "[IsCheck]")
 
 TEST_CASE("Slider move generation", "[move_generation]") {
     State state = StateFromFen("8/8/8/8/8/8/K2pR2P/R7 w - - 0 1");
-
-	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
-	Bitboard moveOccupation = std::accumulate<>(state.bbs, state.bbs + NUMBER_PIECES, Bitboard(0), bit_or);
-	Bitboard enemyOccupation = std::accumulate<>(state.bbs + NUMBER_PIECES, state.bbs + 2 * NUMBER_PIECES, Bitboard(0), bit_or);
 	TMoveContainer moves;
 
     SECTION("Rook move generation") {
-        auto rookBB = state.bbs[ROOK];
+        auto rookBB = state.whitePiece<ROOK>();
         
         // Generate moves for the white rook on a1
-         SliderMoves<ROOK>(state, moves, state.bbs[ROOK], moveOccupation, enemyOccupation);
+         SliderMoves<ROOK>(state, moves);
 
         std::set<Move> expectedMoves = {
             CreateMove(e2, d2), CreateMove(e2, f2), CreateMove(e2, g2), CreateMove(e2, e1), CreateMove(e2, e3), CreateMove(e2, e4),
@@ -332,13 +327,11 @@ TEST_CASE("Slider move generation", "[move_generation]") {
     SECTION("Bishop move generation") {
         std::string fenString = "rnbqkbnr/pppppppp/8/8/4B3/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         auto state = StateFromFen(fenString);
-        auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
-	    Bitboard moveOccupation = std::accumulate<>(state.bbs, state.bbs + NUMBER_PIECES, Bitboard(0), bit_or);
-	    Bitboard enemyOccupation = std::accumulate<>(state.bbs + NUMBER_PIECES, state.bbs + 2 * NUMBER_PIECES, Bitboard(0), bit_or);
+
 	    TMoveContainer moves;
 
         // Generate moves for the white bishop on e4
-        SliderMoves<BISHOP>(state, moves, state.bbs[BISHOP], moveOccupation, enemyOccupation);
+        SliderMoves<BISHOP>(state, moves);
 
         std::set<Move> expectedMoves = {
             CreateMove(e4, f5), CreateMove(e4, g6), CreateMove(e4, h7), CreateMove(e4, d3),
@@ -352,14 +345,10 @@ TEST_CASE("Slider move generation", "[move_generation]") {
     SECTION("Test king castling")
     {
         auto state = StateFromFen("rnbqkbnr/pppppppp/8/8/4B3/8/PPPPPPPP/R3K2R w KQkq - 0 1");
-        Bitboard moveOccupation = std::accumulate<>(state.bbs, state.bbs + NUMBER_PIECES, Bitboard(0), bit_or);
-	    Bitboard enemyOccupation = std::accumulate<>(state.bbs + NUMBER_PIECES, state.bbs + 2 * NUMBER_PIECES, Bitboard(0), bit_or);
 	    TMoveContainer moves;
 
-         // Generate moves for the white bishop on e4
-        auto kingBB = state.bbs[KING];
-        auto rookBB = state.bbs[ROOK];
-        KingCastling(state, moves, kingBB, rookBB, moveOccupation, enemyOccupation, true);
+        // Generate castling moves
+        KingCastling(state, moves);
 
         std::set<Move> expectedMoves = {
             CreateMove(e1, g1), CreateMove(e1, c1)
@@ -367,6 +356,14 @@ TEST_CASE("Slider move generation", "[move_generation]") {
 
         std::set<Move> movesGenerated = std::set(moves.begin(), moves.end());
         REQUIRE(movesGenerated == expectedMoves);
+
+        state = StateFromFen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1");
+        KingCastling(state, moves);
+
+        expectedMoves = {
+            CreateMove(e8, g8), CreateMove(e8, c8)
+        };
+
     }
 }
 

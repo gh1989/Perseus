@@ -4,60 +4,29 @@
 #include "move.h"
 #include "move_generation.h"
 
-/* Move generation */
+/* (Pseudo-)Move generation */
 TMoveContainer GenerateMoves(const State& state) {
-
 	TMoveContainer moves;
-
-	/* Offset for moving/enemy bitboards */
-	const uint8_t pieceStart = state.turn ?  0 : NUMBER_PIECES;
-	const uint8_t enemyPieceStart = state.turn ? NUMBER_PIECES : 0;
-	bool whitePieces = !state.turn;
-	
-	/* Occupation */
-	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
-	Bitboard moveOccupation = std::accumulate<>(state.bbs + pieceStart, state.bbs + pieceStart + NUMBER_PIECES, Bitboard(0), bit_or);
-	Bitboard enemyOccupation = std::accumulate<>(state.bbs + enemyPieceStart, state.bbs + enemyPieceStart + NUMBER_PIECES, Bitboard(0), bit_or);
-	
-	/* Pawn moves */
-	auto pawnBB = state.bbs[pieceStart + PAWN];
-	PawnMoves(state, moves, pawnBB, moveOccupation, enemyOccupation, whitePieces);
-
-	/* Knight */
-	auto knightBB = state.bbs[pieceStart + KNIGHT];
-	JumperMoves<KNIGHT>(state, moves, knightBB, moveOccupation);
-
-	/* Bishop */
-	auto queenBB = state.bbs[pieceStart + QUEEN];
-	auto bishopBB = state.bbs[pieceStart + BISHOP];
-	auto beeshopBB = queenBB | bishopBB;
-	SliderMoves<BISHOP>(state, moves, beeshopBB, moveOccupation, enemyOccupation);
-
-	/* Rook */
-	Bitboard rookBB = state.bbs[pieceStart + ROOK];
-	auto theRookBB = rookBB | queenBB;
-	SliderMoves<ROOK>(state, moves, theRookBB, moveOccupation, enemyOccupation);
-
-	/* King */
-	auto kingBB = state.bbs[pieceStart + KING];
-	JumperMoves<KING>(state, moves, kingBB, moveOccupation);
-	KingCastling(state, moves, kingBB, rookBB, moveOccupation, enemyOccupation, whitePieces);
+	PawnMoves(state, moves);
+	JumperMoves<KNIGHT>(state, moves);
+	SliderMoves<BISHOP>(state, moves);
+	SliderMoves<ROOK>(state, moves);
+	JumperMoves<KING>(state, moves);
+	KingCastling(state, moves);
 }
 
 void PawnMoves(
 	const State& state, 
-	TMoveContainer &moves, 
-	const Bitboard& pawnBB, 
-	const Bitboard& moveOccupancy, 
-	const Bitboard& enemyOccupancy, 
-	bool whitePieces)
+	TMoveContainer &moves)
 {
 	/* Pawn moves: without rotation */
 	Bitboard square, push_once, push_twice, capt_diag;
+	auto pawnBB = state.movePiece<PAWN>();
 	const size_t id_ep = 12;
 			
 	const Piece promote_pieces[4] = { KNIGHT, BISHOP, ROOK, QUEEN };
 
+	bool whitePieces 	 = !state.isBlackMove();
 	int pawn_off_1    	 = whitePieces ?  8 :  -8;
 	int pawn_off_2    	 = whitePieces ? 16 : -16;
 	const int p_att_l 	 = whitePieces ?  7 :  -7;
@@ -66,7 +35,7 @@ void PawnMoves(
 	const int promRank   = whitePieces ? 6 : 1;
 	const int dblPushRnk = whitePieces ? 1 : 6;
 
-	auto fullOccupancy = moveOccupancy | enemyOccupancy;
+	auto fullOccupancy = state.blackOccupation() | state.whiteOccupation();
 
 	for (auto sqbb : BitboardRange(pawnBB)) {
 
@@ -92,7 +61,9 @@ void PawnMoves(
 				moves.emplace_back(CreateMove(sqr, Square(sqr + pawn_off_1)));
 		}
 
-		if (cpattacks[sqr] & (enemyOccupancy | state.bbs[id_ep]))
+		auto enemyOccupancy = state.enemyOccupation();
+		auto enPassant = state.getEnPassant();
+		if (cpattacks[sqr] & (enemyOccupancy | enPassant))
 			for (int shft : {p_att_l, p_att_r})
 			{
 				// You cannot capture off the side of the board.
@@ -106,7 +77,7 @@ void PawnMoves(
 
 				capt_diag = shft < 0 ? square >> -shft : square << shft;
 				auto to = Square(sqr + shft);
-				if (capt_diag & (enemyOccupancy | state.bbs[id_ep]))
+				if (capt_diag & (enemyOccupancy | enPassant))
 				{
 					// Promotion
 					if (promote_cond)
@@ -115,7 +86,7 @@ void PawnMoves(
 					else
 					{
 						// Taking enpassant
-						if (cpattacks[sqr] & state.bbs[id_ep])
+						if (cpattacks[sqr] & enPassant)
 							moves.emplace_back(CreateEnPassant(sqr, to));
 						else
 							moves.emplace_back(CreateMove(sqr, to));
@@ -127,25 +98,24 @@ void PawnMoves(
 
 void KingCastling(
 	const State& state,
-	TMoveContainer &moves,
-	const Bitboard& kingBB,
-	const Bitboard& rookBB,
-	const Bitboard& moveOccupation,
-	const Bitboard& enemyOccupation,
-	bool wPieces)
+	TMoveContainer &moves)
 {
+	bool wPieces 	= !state.isBlackMove();
+	auto rookBB     = state.movePiece<ROOK>();
+	auto kingBB     = state.movePiece<KING>();
 	auto kingStart  = wPieces ? e1 : e8;
+	auto castle     = state.getCastleRights();
 	
 	auto kCastleEnd = wPieces ? g1 : g8;
 	auto ksCastling = wPieces ? Castling::WK : Castling::BK;
 	auto kRookStart = wPieces ? h1 : h8;
-	if ((rookBB & squares[kRookStart]) && (state.castle & ksCastling ))
+	if ((rookBB & squares[kRookStart]) && (castle & ksCastling ))
 		moves.emplace_back(CreateMove(kingStart, kCastleEnd));
 
 	auto qsCastling = wPieces ? Castling::WQ : Castling::BQ;
 	auto qCastleEnd = wPieces ? c1 : c8;
 	auto qRookStart = wPieces ? a1 : a8;
-	if ((rookBB & squares[qRookStart]) && (state.castle & qsCastling ))
+	if ((rookBB & squares[qRookStart]) && (castle & qsCastling ))
 	{
 		moves.emplace_back(CreateMove(kingStart, qCastleEnd));
 	}
@@ -154,11 +124,12 @@ void KingCastling(
 template <Piece _Piece>
 void JumperMoves(
     const State& s,
-    TMoveContainer &moves,
-	const Bitboard& pieceBB,
-    const Bitboard& moveOccupation )
+    TMoveContainer &moves )
 {
 	auto attacks = _Piece == KNIGHT ? knight_attacks : neighbours;
+	auto pieceBB = s.movePiece<_Piece>();
+	auto moveOccupation = s.moveOccupation();
+
     for (const auto& sqbb : BitboardRange(pieceBB))
     {
         Square sqr = Square(sqbb);
@@ -172,12 +143,13 @@ void JumperMoves(
 template <Piece _Piece>
 inline void SliderMoves(
     const State& state,
-    TMoveContainer &moves,
-    const Bitboard& sliderPieces,
-    const Bitboard& moveOccupancy,
-    const Bitboard& enemyOccupancy)
+    TMoveContainer &moves)
 {
 	auto directions = _Piece == BISHOP ? bishop_directions : rook_directions;
+	auto enemyOccupancy = state.enemyOccupation();
+	auto sliderPieces = state.movePiece<_Piece>();
+	auto moveOccupancy = state.moveOccupation();
+	
     for (auto sliderSquare : BitboardRange(sliderPieces))
     {
         Bitboard squareBB = squares[sliderSquare];
@@ -219,28 +191,26 @@ bool isCheck(const State& state, bool whitePieces)
 	const uint8_t offsetUs = whitePieces ? 0 : NUMBER_PIECES;
 	const uint8_t offsetThem = whitePieces ? NUMBER_PIECES : 0;
 
-	Bitboard ourKing = state.bbs[offsetUs + KING];
-	auto enemyKnights = state.bbs[offsetThem + KNIGHT];
+	Bitboard ourKing = state.movePiece<KING>();
+	auto enemyKnights = state.enemyPiece<KNIGHT>();
 
 	Square thisKingSquare = square_lookup.at(ourKing.bit_number);
 	if ((knight_attacks[thisKingSquare] & enemyKnights).bit_number)
 		return true;
 
 	auto enemyPawnAttackMask = whitePieces ? pawn_attacks : pawn_attacks_b;
-	auto enemyPawns = state.bbs[offsetThem + PAWN];
+	auto enemyPawns = state.enemyPiece<PAWN>();
 	if ((enemyPawnAttackMask[thisKingSquare] & enemyPawns).bit_number)
 		return true;
 
-	auto bit_or = [&](const Bitboard &a, const Bitboard &b) { return a | b; };
-	Bitboard occupancy = std::accumulate<>(state.bbs, state.bbs + 2*NUMBER_PIECES, Bitboard(0), bit_or);
-
-	auto queens = state.bbs[offsetThem + QUEEN];
-	auto bishops = state.bbs[offsetThem + BISHOP];
+	auto queens = state.enemyPiece<QUEEN>();
+	auto bishops = state.enemyPiece<BISHOP>();
+	auto occupancy = state.blackOccupation() | state.whiteOccupation();
 	auto diagonals = queens | bishops;
 	if (SquareConnectedToBitboard(thisKingSquare, diagonals, occupancy&~diagonals, bishop_directions))
 		return true;
 
-	auto rooks = state.bbs[offsetThem + ROOK];
+	auto rooks = state.enemyPiece<ROOK>();
 	auto straights = queens | rooks;
 	if (SquareConnectedToBitboard(thisKingSquare, straights, occupancy&~straights, rook_directions))
 		return true;

@@ -15,34 +15,20 @@ TMoveContainer GenerateMoves(const State&);
 
 void PawnMoves(
 	const State& state,
-	TMoveContainer &moves,
-	const Bitboard& pawnBB,
-	const Bitboard& moveOccupancy,
-	const Bitboard& enemyOccupancy,
-	bool whitePieces);
+	TMoveContainer &moves);
 
 template <Piece _Piece>
 void JumperMoves(
     const State& state,
-	TMoveContainer &moves,
-	const Bitboard& pieceBB,
-    const Bitboard& moveOccupation);
+	TMoveContainer &moves);
 
 template <Piece _Piece>
 void SliderMoves(
     const State& state,
-	TMoveContainer &moves,
-    const Bitboard& sliderPieces,
-    const Bitboard& moveOccupancy,
-    const Bitboard& enemyOccupancy);
+	TMoveContainer &moves);
 
 void KingCastling(
 	const State& state,
-	TMoveContainer &moves,
-	const Bitboard& kingBB,
-	const Bitboard& rookBB,
-	const Bitboard& moveOccupation,
-	const Bitboard& enemyOccupation,
-	bool wPieces);
+	TMoveContainer &moves);
 
 bool isCheck(const State& state, bool whiteKing);
