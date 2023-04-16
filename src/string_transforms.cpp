@@ -171,7 +171,7 @@ State StateFromFen(std::string fen)
     			['K'] = KING
 			};
 			Piece _piece = pieceLookup[C]; 
-			state.addToBitboard(_whitePiece*NUMBER_PIECES+_piece, square );
+			state.addToBitboard(!_whitePiece*NUMBER_PIECES+_piece, square );
 		}
 	}
 

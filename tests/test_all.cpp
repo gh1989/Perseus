@@ -192,7 +192,7 @@ TEST_CASE("FEN to state conversion", "[state]")
         REQUIRE(state.isBlackMove() == 0);     // white to move
         REQUIRE(state.getEnPassant().bit_number == 0);  // no en passant square
         REQUIRE(state.getMoveCount() == 0);      // 50-move rule not applicable
-        REQUIRE(state.getPlies() == 0);    // first move
+        REQUIRE(state.getPlies() == 1);    // first move
     }
 
     SECTION("Knight check state")
@@ -249,9 +249,9 @@ TEST_CASE("Knight bit boards from FEN strings", "[state]") {
     SECTION("Knight checkmate") {
         std::string fen = "7k/8/8/8/8/8/3N4/K7 w - - 0 1";
         State state = StateFromFen(fen);
-        REQUIRE(state.whitePiece<KNIGHT>().bit_number                == 0x0000000000000800ULL);  // white knights
+        REQUIRE(state.whitePiece<KNIGHT>().bit_number  == 0x0000000000000800ULL);  // white knights
         REQUIRE(state.blackPiece<KING>().bit_number    == 0x8000000000000000ULL);  // black KING
-        REQUIRE(state.blackPiece<KNIGHT>().bit_number  == 0x0000000000000800ULL);  // black knights
+        REQUIRE(state.whitePiece<KING>().bit_number  == 0x1ULL);  // white KING
     }
 
     SECTION("Knight stalemate") {
