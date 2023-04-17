@@ -217,3 +217,49 @@ bool isCheck(const State& state, bool whitePieces)
 
 	return false;
 }
+
+bool checkLegal(const State& state, Move move)
+{
+	auto moveKing = state.movePiece<KING>();
+	auto oppBishops = state.enemyPiece<QUEEN>() | state.enemyPiece<BISHOP>();
+	auto oppRooks = state.enemyPiece<QUEEN>() | state.enemyPiece<ROOK>();
+	auto fromSq = GetFrom(move);
+	auto toSq = GetTo(move);
+	bool checkCheck = false;
+
+	// Bad algorithm... 
+    if (!checkCheck)
+    {
+		auto diag = diagonals[fromSq];
+        if ((moveKing & diag) && (oppBishops & diag))
+            checkCheck = bool(diagonals[fromSq] & ~diagonals[toSq]);
+    }
+    if (!checkCheck) 
+    {
+        auto adiag = antidiagonals[fromSq];
+        if ((moveKing & adiag) && (oppBishops & adiag))
+            checkCheck = bool(antidiagonals[fromSq] & ~antidiagonals[toSq]);
+    }
+    if (!checkCheck)
+    {
+        auto rank = ranks[fromSq / 8];
+        if ((moveKing & rank) && (oppRooks & rank))
+            checkCheck = bool(ranks[fromSq/8] & ~ranks[toSq/8]);
+    }
+    if (!checkCheck)
+    {
+        auto file = files[fromSq % 8];
+        if ((moveKing & file) && (oppRooks & file))
+            checkCheck = bool(files[fromSq%8] & ~files[toSq%8]);
+    }
+
+	// Here's the bad part.
+	if (checkCheck)
+	{
+		State state_copy(state);
+		state_copy.Apply(move);
+		return isCheck(state_copy, state_copy.isBlackMove());
+	}
+
+	return true;
+}

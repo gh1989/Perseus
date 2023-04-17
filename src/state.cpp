@@ -55,13 +55,13 @@ void State::Apply(Move move) {
 			else { bbs[12] = 0; }
 
 			if (p == KING) {
-				castle = castle & ~(blackMove ? (WQ + WK) : (BQ + WK));
+				castle = castle & ~(blackMove ? (BQ + BK) : (WQ + WK));
 			}
 			else if (p == ROOK) {
-				if (start == a1) castle &= ~WQ;
-				else if (start == h1) castle &= ~WK;
-				else if (start == a8) castle &= ~BQ;
-				else if (start == h8) castle &= ~BK;
+				if (start == a1 && !blackMove) castle &= ~WQ;
+				else if (start == h1 && !blackMove) castle &= ~WK;
+				else if (start == a8 && blackMove) castle &= ~BQ;
+				else if (start == h8 && blackMove) castle &= ~BK;
 			}
 			bbs[i] = OffBit(bbs[i], start);
 			break;
@@ -74,8 +74,9 @@ void State::Apply(Move move) {
 	}
 	/* En passant capture */
 	if (specl == ENPASSANT) {
+		auto enPassant = bbs[12];
 		new50 = true;
-		auto passantp = blackMove ? (bbs[12] >> 8) : (bbs[12] << 8);
+		auto passantp = blackMove ? (enPassant>> 8) : (enPassant<< 8);
 		bbs[ip] = bbs[ip] | bbs[12];
 		bbs[ip2] = bbs[ip2] & ~passantp;
 	}
@@ -94,10 +95,11 @@ void State::Apply(Move move) {
 		auto s1 = Square(qs ? finish - 2 : finish + 1);
 		auto s2 = Square(qs ? finish + 1 : finish - 1);
 		bbs[rk] = BitMove(bbs[rk], s1, s2);
-		castle = castle & ~(blackMove ? (WQ + WK) : (BQ + WK));
+		castle = castle & ~(blackMove ? (BQ + BK) : (WQ + WK));
 	}
 	c50 = new50 ? 0 : c50 + 1;
 	blackMove = other;
+	plies++;
 }
 
 

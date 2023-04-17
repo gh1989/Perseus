@@ -32,3 +32,5 @@ void KingCastling(
 	TMoveContainer &moves);
 
 bool isCheck(const State& state, bool whiteKing);
+
+bool checkLegal(const State& state, Move move);

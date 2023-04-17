@@ -176,7 +176,7 @@ State StateFromFen(std::string fen)
 	}
 
 	state.setBitboard(12, get_en_passant(fen));
-	state.setMoveCount( get_fifty_move_count(fen) );
+	state.set50MoveCount( get_fifty_move_count(fen) );
 	state.setBlackMove( get_turn(fen) );
 	
 	// Find the position of the castling part of the FEN string
@@ -205,9 +205,9 @@ State StateFromFen(std::string fen)
 	}
 
 	// Find the position of the ply part of the FEN string
-	std::size_t ply_pos = fen.find_last_of(' ');
-	std::string ply_str = fen.substr(ply_pos + 1);
-	state.setPlies( std::stoi(ply_str) );
+	std::size_t move_pos = fen.find_last_of(' ');
+	std::string move_str = fen.substr(move_pos + 1);
+	state.setPlies( 2*(std::stoi(move_str)-1) + state.isBlackMove() );
 
 	return state;
 }

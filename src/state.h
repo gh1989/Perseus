@@ -16,6 +16,14 @@ private:
 
 public:
 
+	bool operator==(const State& other) const {
+		return 	+bbs == +other.bbs &&
+				c50 == other.c50 &&
+				castle == other.castle && 
+				plies == other.plies &&
+				blackMove == other.blackMove;
+	}
+
  // Getter and Setter for bbs
     Bitboard getBitboard(int index) const {
         return bbs[index];
@@ -29,10 +37,10 @@ public:
 
     // Getter and Setter for c50
     uint8_t getMoveCount() const {
-        return c50;
+        return plies / 2;
     }
     void setMoveCount(uint8_t value) {
-        c50 = value;
+        plies = value;
     }
 
     // Getter and Setter for castle
@@ -53,6 +61,14 @@ public:
     void setPlies(uint32_t value) {
         plies = value;
     }
+
+	uint8_t get50MoveCount() const {
+		return c50;
+	}
+
+	void set50MoveCount(uint8_t value) {
+		c50 = value;
+	}
 
     // Getter and Setter for blackMove
     bool isBlackMove() const {

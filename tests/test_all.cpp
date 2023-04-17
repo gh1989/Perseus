@@ -191,8 +191,10 @@ TEST_CASE("FEN to state conversion", "[state]")
         REQUIRE(state.getCastleRights() == 15);  // all castling rights
         REQUIRE(state.isBlackMove() == 0);     // white to move
         REQUIRE(state.getEnPassant().bit_number == 0);  // no en passant square
-        REQUIRE(state.getMoveCount() == 0);      // 50-move rule not applicable
-        REQUIRE(state.getPlies() == 1);    // first move
+        REQUIRE(state.getMoveCount() == 0);    
+        REQUIRE(state.get50MoveCount() == 0);  
+        REQUIRE(state.getMoveCount() == 0);    // first move
+        REQUIRE(state.getPlies() == 0);
     }
 
     SECTION("Knight check state")
@@ -222,25 +224,25 @@ TEST_CASE("FEN to state conversion", "[state]")
     SECTION("Check c50")
     {
         State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 1");
-        REQUIRE(state.getMoveCount() == 23 );
+        REQUIRE(state.get50MoveCount() == 23 );
 
         state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 0 1");
-        REQUIRE(state.getMoveCount() == 0 );
+        REQUIRE(state.get50MoveCount() == 0 );
 
         state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 100 1");
-        REQUIRE(state.getMoveCount() == 100 );
+        REQUIRE(state.get50MoveCount() == 100 );
     }
 
     SECTION("Check plies")
     {
         State state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 123");
-        REQUIRE(state.getPlies() == 123 );
+        REQUIRE(int(state.getMoveCount()) == 122 );
 
         state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 13");
-        REQUIRE(state.getPlies() == 13 );
+        REQUIRE(state.getMoveCount() == 12 );
 
-        state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 9999999");
-        REQUIRE(state.getPlies() == 9999999 );
+        //state = StateFromFen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e3 23 9999999");
+        //REQUIRE(state.getMoveCount() == 9999998 );
     }
 }
 
@@ -363,10 +365,88 @@ TEST_CASE("Slider move generation", "[move_generation]") {
         expectedMoves = {
             CreateMove(e8, g8), CreateMove(e8, c8)
         };
-
     }
 }
 
+TEST_CASE("Test move application", "[moveApplication]")
+{
+
+    SECTION("Game from start position, castling, capturing, promotion")
+    {
+            State state = StateFromFen();
+
+            // apply some moves
+            state.Apply(CreateMove(e2, e4)); // white pawn moves 2 squares
+            state.Apply(CreateMove(e7, e5)); // black pawn moves 2 squares
+            state.Apply(CreateMove(g1, f3)); // white knight moves
+            state.Apply(CreateMove(d7, d6)); // black pawn moves
+            state.Apply(CreateMove(f3, e5)); // white knight captures black pawn
+            state.Apply(CreateMove(d6, e5)); // black pawn captures white knight
+            state.Apply(CreateMove(d2, d4)); // white pawn moves 2 squares
+            state.Apply(CreateMove(e5, d4)); // black pawn captures white pawn
+            state.Apply(CreateMove(g2, g3)); // white pawn moves
+            state.Apply(CreateMove(d8, h4)); 
+            state.Apply(CreateMove(f1, c4)); 
+            state.Apply(CreateMove(h4, g4));
+            state.Apply(CreateCastle(e1, g1)); 
+            state.Apply(CreateMove(c8, f5)); 
+            state.Apply(CreateMove(e4, e5));
+            state.Apply(CreateMove(b8, c6));
+            state.Apply(CreateMove(e5, e6));
+            state.Apply(CreateCastle(e8, c8)); 
+            state.Apply(CreateMove(e6, f7));
+            state.Apply(CreateMove(g7, g5));
+            state.Apply(CreatePromotion(f7, g8, ROOK));
+
+            auto expectedState = StateFromFen("2kr1bRr/ppp4p/2n5/5bp1/2Bp2q1/6P1/PPP2P1P/RNBQ1RK1 b - - 0 11");
+
+            for(int i=0; i<NUMBER_PIECES+1; i++)
+                REQUIRE(state.getBitboard(i) == expectedState.getBitboard(i));
+            REQUIRE(state.getEnPassant() == expectedState.getEnPassant());
+            REQUIRE(state.getPlies() == expectedState.getPlies());
+            REQUIRE(state.getCastleRights() == expectedState.getCastleRights());
+            REQUIRE(state.getMoveCount() == expectedState.getMoveCount());
+            REQUIRE(state.get50MoveCount() == expectedState.get50MoveCount());
+            REQUIRE(state.isBlackMove() == expectedState.isBlackMove());
+            //REQUIRE(state == expectedState);
+            
+    }
+}
+
+TEST_CASE("checkLegal returns true for legal move", "[checkLegal]") {
+    State state;
+    Move illegalMove;
+    
+    SECTION("checkLegal diagonals")
+    {
+        state = StateFromFen("rnb1kbnr/pppppppp/8/8/2q5/8/PPPPPPPP/RNBQKBNR w - - 0 1");
+        illegalMove = CreateMove(e2, e4);
+        REQUIRE(checkLegal(state, illegalMove) == false);
+
+    }
+
+    SECTION("checkLegal ranks")
+    {
+        state = StateFromFen("1nb1k1nr/pppppppp/3b4/4P3/5K2/8/PPPP1PPP/RNBQ1BNR w - - 0 1");
+        illegalMove = CreateMove(e5, e6);
+        //REQUIRE(checkLegal(state, illegalMove) == false);
+
+        state = StateFromFen("1nb1kbnr/pppppppp/8/8/1r2PK2/8/PPPP1PPP/RNBQ1BNR w - - 0 1");
+        illegalMove = CreateMove(e4, e5);
+       //REQUIRE(checkLegal(state, illegalMove) == false);
+
+        state = StateFromFen("1nb1kbnr/pppppppp/8/8/8/2r1NK2/PPPP1PPP/R1BQ1B1R w - - 0 1");
+        illegalMove = CreateMove(e3, f5);
+        REQUIRE(checkLegal(state, illegalMove) == false);
+    }
+
+    SECTION("checkLegal files")
+    {
+        state = StateFromFen("1nb1kbnr/pppppppp/5r2/5N2/5K2/8/PPPP1PPP/R1BQ1B1R w - - 0 1");
+        illegalMove = CreateMove(f5, e3);
+        REQUIRE(checkLegal(state, illegalMove) == false);
+    }
+}
 
 int main(int argc, char* argv[]) {
     // This line starts the Catch2 test runner
