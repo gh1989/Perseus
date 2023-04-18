@@ -377,6 +377,7 @@ TEST_CASE("Test move application", "[moveApplication]")
 
             // apply some moves
             state.Apply(CreateMove(e2, e4)); // white pawn moves 2 squares
+            REQUIRE(state.isBlackMove());
             state.Apply(CreateMove(e7, e5)); // black pawn moves 2 squares
             state.Apply(CreateMove(g1, f3)); // white knight moves
             state.Apply(CreateMove(d7, d6)); // black pawn moves
@@ -408,7 +409,6 @@ TEST_CASE("Test move application", "[moveApplication]")
             REQUIRE(state.getMoveCount() == expectedState.getMoveCount());
             REQUIRE(state.get50MoveCount() == expectedState.get50MoveCount());
             REQUIRE(state.isBlackMove() == expectedState.isBlackMove());
-            //REQUIRE(state == expectedState);
             
     }
 }
@@ -419,9 +419,19 @@ TEST_CASE("checkLegal returns true for legal move", "[checkLegal]") {
     
     SECTION("checkLegal diagonals")
     {
-        state = StateFromFen("rnb1kbnr/pppppppp/8/8/2q5/8/PPPPPPPP/RNBQKBNR w - - 0 1");
-        illegalMove = CreateMove(e2, e4);
+        state = StateFromFen("rnb1kbnr/pppppppp/8/8/1q6/8/PPPPPPPP/RNBQKBNR w - - 0 1");
+        illegalMove = CreateMove(d2, d4);
         REQUIRE(checkLegal(state, illegalMove) == false);
+
+    }
+
+    SECTION("isCheck bug")
+    {
+        state = StateFromFen("1nb1kbnr/pppppppp/8/4P3/1r3K2/8/PPPP1PPP/RNBQ1BNR b - - 0 1");
+        REQUIRE(isCheck(state, true));
+
+        state = StateFromFen("1nb1kbnr/pppppppp/5r2/8/5K2/4N3/PPPP1PPP/R1BQ1B1R b - - 0 1");
+        REQUIRE(isCheck(state, true));
 
     }
 
@@ -429,11 +439,11 @@ TEST_CASE("checkLegal returns true for legal move", "[checkLegal]") {
     {
         state = StateFromFen("1nb1k1nr/pppppppp/3b4/4P3/5K2/8/PPPP1PPP/RNBQ1BNR w - - 0 1");
         illegalMove = CreateMove(e5, e6);
-        //REQUIRE(checkLegal(state, illegalMove) == false);
+        REQUIRE(checkLegal(state, illegalMove) == false);
 
         state = StateFromFen("1nb1kbnr/pppppppp/8/8/1r2PK2/8/PPPP1PPP/RNBQ1BNR w - - 0 1");
         illegalMove = CreateMove(e4, e5);
-       //REQUIRE(checkLegal(state, illegalMove) == false);
+        REQUIRE(checkLegal(state, illegalMove) == false);
 
         state = StateFromFen("1nb1kbnr/pppppppp/8/8/8/2r1NK2/PPPP1PPP/R1BQ1B1R w - - 0 1");
         illegalMove = CreateMove(e3, f5);
@@ -445,6 +455,20 @@ TEST_CASE("checkLegal returns true for legal move", "[checkLegal]") {
         state = StateFromFen("1nb1kbnr/pppppppp/5r2/5N2/5K2/8/PPPP1PPP/R1BQ1B1R w - - 0 1");
         illegalMove = CreateMove(f5, e3);
         REQUIRE(checkLegal(state, illegalMove) == false);
+    }
+
+    SECTION("Cant castle when in check")
+    {
+        state = StateFromFen("1nb1kb1r/pppppppp/4r3/2n5/8/5B2/PPP2PPP/R1B1K2R w - - 0 1");
+        illegalMove = CreateCastle(e1, g1);
+        REQUIRE(checkLegal(state, illegalMove) == false );
+    }
+
+    SECTION("Cant castle through check")
+    {
+        state = StateFromFen("r3kb1r/ppp1pppp/8/2nb1B2/5pn1/8/PPP2PPP/R1BRK3 b - - 0 1");
+        illegalMove = CreateCastle(e8, c8);
+        REQUIRE(checkLegal(state, illegalMove) == false );
     }
 }
 

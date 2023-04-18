@@ -185,36 +185,41 @@ inline void SliderMoves(
     }
 }
 
-bool isCheck(const State& state, bool whitePieces)
+bool isCheck(const State& state, bool blackIsAttacking)
 {
-	/* Offset for bitboards */
-	const uint8_t offsetUs = whitePieces ? 0 : NUMBER_PIECES;
-	const uint8_t offsetThem = whitePieces ? NUMBER_PIECES : 0;
+	Bitboard colourKing = blackIsAttacking ? state.whitePiece<KING>() : state.blackPiece<KING>();
+	return isBitboardAttacked(colourKing, state, blackIsAttacking);
+}
 
-	Bitboard ourKing = state.movePiece<KING>();
-	auto enemyKnights = state.enemyPiece<KNIGHT>();
-
-	Square thisKingSquare = square_lookup.at(ourKing.bit_number);
-	if ((knight_attacks[thisKingSquare] & enemyKnights).bit_number)
-		return true;
-
-	auto enemyPawnAttackMask = whitePieces ? pawn_attacks : pawn_attacks_b;
-	auto enemyPawns = state.enemyPiece<PAWN>();
-	if ((enemyPawnAttackMask[thisKingSquare] & enemyPawns).bit_number)
-		return true;
-
-	auto queens = state.enemyPiece<QUEEN>();
-	auto bishops = state.enemyPiece<BISHOP>();
+bool isBitboardAttacked(const Bitboard& bitboard, const State& state, bool blackIsAttacking)
+{
+	auto oppKnights = blackIsAttacking ? state.blackPiece<KNIGHT>() : state.whitePiece<KNIGHT>();
+	auto oppQueens = blackIsAttacking ? state.blackPiece<QUEEN>() : state.whitePiece<QUEEN>();
+	auto oppBishops = blackIsAttacking ? state.blackPiece<BISHOP>() : state.whitePiece<BISHOP>();
 	auto occupancy = state.blackOccupation() | state.whiteOccupation();
-	auto diagonals = queens | bishops;
-	if (SquareConnectedToBitboard(thisKingSquare, diagonals, occupancy&~diagonals, bishop_directions))
-		return true;
+	auto diagonals = oppQueens | oppBishops;
+	auto oppRooks = blackIsAttacking ? state.blackPiece<ROOK>() : state.whitePiece<ROOK>();
+	auto straights = oppQueens | oppRooks;
+	auto movePawnAttackMask = blackIsAttacking ? pawn_attacks : pawn_attacks_b;
+	auto enemyPawns = blackIsAttacking ? state.blackPiece<PAWN>() : state.whitePiece<PAWN>();
 
-	auto rooks = state.enemyPiece<ROOK>();
-	auto straights = queens | rooks;
-	if (SquareConnectedToBitboard(thisKingSquare, straights, occupancy&~straights, rook_directions))
-		return true;
+	for(auto itSqr : BitboardRange(bitboard))
+	{
+		Square cSqr = static_cast<Square>(itSqr);
+		if ((knight_attacks[cSqr] & oppKnights).bit_number)
+			return true;
 
+		// If our king "attacks" the enemy pawn like a pawn it's in check.
+		if ((movePawnAttackMask[cSqr] & enemyPawns).bit_number)
+			return true;
+
+		if (SquareConnectedToBitboard(cSqr, diagonals, occupancy&~diagonals, bishop_directions))
+			return true;
+
+		if (SquareConnectedToBitboard(cSqr, straights, occupancy&~straights, rook_directions))
+			return true;
+	}
+	
 	return false;
 }
 
@@ -227,12 +232,44 @@ bool checkLegal(const State& state, Move move)
 	auto toSq = GetTo(move);
 	bool checkCheck = false;
 
-	// Bad algorithm... 
+	// Don't move the king into check
+	if(fromSq == square_lookup.at(moveKing))
+	{
+		if( neighbours[moveKing] & state.enemyPiece<KING>() )
+			return false;
+		checkCheck = true;
+	}
+
+    // Don't castle through check
+	if( SpecialMoveType(move) == SpecialMove::CASTLE )
+	{
+		// Check if we are already in check. So send current isBlackMove
+		if (isCheck(state, !state.isBlackMove()))
+			return false;
+
+		Bitboard kingsPath(0);
+		if( toSq == c8 )
+			kingsPath = GetSquare(d8, c8);
+		if( toSq == c1 )
+			kingsPath = GetSquare(d1, c1);
+		if( toSq == g8 )
+			kingsPath = GetSquare(f8, g8);
+		if( toSq == g1 )
+			kingsPath = GetSquare(f1, g1);
+
+		// Check if path is attacked. 
+		return isBitboardAttacked(kingsPath, state, !state.isBlackMove());
+	}
+
+	// Bad algorithm... prevent pinned pieces from moving
     if (!checkCheck)
     {
 		auto diag = diagonals[fromSq];
         if ((moveKing & diag) && (oppBishops & diag))
+		{
             checkCheck = bool(diagonals[fromSq] & ~diagonals[toSq]);
+			std::cout << "diag checkCheck!" << std::endl;
+		}
     }
     if (!checkCheck) 
     {
@@ -258,7 +295,11 @@ bool checkLegal(const State& state, Move move)
 	{
 		State state_copy(state);
 		state_copy.Apply(move);
-		return isCheck(state_copy, state_copy.isBlackMove());
+
+		// Need to flip the isBlackMove here because we are testing if we 
+		// were to make the move would it be check with the previous player
+		// still attacking.
+		return isCheck(state_copy, !state_copy.isBlackMove());
 	}
 
 	return true;

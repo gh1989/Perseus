@@ -31,6 +31,7 @@ void KingCastling(
 	const State& state,
 	TMoveContainer &moves);
 
-bool isCheck(const State& state, bool whiteKing);
+bool isCheck(const State& state, bool blackIsAttacking);
+bool isBitboardAttacked(const Bitboard& bitboard, const State& state, bool blackIsAttacking);
 
 bool checkLegal(const State& state, Move move);

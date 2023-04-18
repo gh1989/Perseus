@@ -32,6 +32,16 @@ int main()
     state.Apply(CreateMove(g7, g5));
     state.Apply(CreatePromotion(f7, g8, ROOK));
 
+    //PrettyPrint(state);
+
+    state = StateFromFen("1nb1kbnr/pppppppp/8/8/8/2r1NK2/PPPP1PPP/R1BQ1B1R w - - 0 1");
     PrettyPrint(state);
+
+    auto illegalMove = CreateMove(e3, f5);
+    //checkLegal(state, illegalMove);
+
+    state = StateFromFen("8/8/8/8/8/4p3/3K4/8 w - - 0 1");
+    isCheck(state, true);
+
     return 0;
 }
