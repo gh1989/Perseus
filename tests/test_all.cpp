@@ -168,6 +168,20 @@ TEST_CASE("nLSB returns correct result for non-zero bitboards", "[bitboard]") {
         }
         REQUIRE(count == 64);
     }
+
+    SECTION("Castle path")
+    {
+        Bitboard bb = GetSquare(d8, c8);
+        unsigned int count = 0;
+        std::set expected{d8, c8};
+        std::set<Square> result;
+        for (unsigned int i : BitboardRange(bb)) {
+            count++;
+            result.insert(Square(i));
+        }
+        REQUIRE(count == 2);
+        REQUIRE(expected == result);
+    }
 }
 
 TEST_CASE("FEN to state conversion", "[state]")
@@ -469,6 +483,14 @@ TEST_CASE("checkLegal returns true for legal move", "[checkLegal]") {
         state = StateFromFen("r3kb1r/ppp1pppp/8/2nb1B2/5pn1/8/PPP2PPP/R1BRK3 b - - 0 1");
         illegalMove = CreateCastle(e8, c8);
         REQUIRE(checkLegal(state, illegalMove) == false );
+    }
+
+    SECTION("Is bitboard attacked")
+    {
+        state = StateFromFen("r3kb1r/ppp1pppp/8/2nb1B2/5pn1/8/PPP2PPP/R1BRK3 b - - 0 1");
+        Bitboard kingsPath = 0xc00000000000000ULL;
+        kingsPath = GetSquare(d8, c8);
+        REQUIRE( isBitboardAttacked(kingsPath, state, state.isBlackMove()) == true );
     }
 }
 

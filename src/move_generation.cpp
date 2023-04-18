@@ -258,7 +258,7 @@ bool checkLegal(const State& state, Move move)
 			kingsPath = GetSquare(f1, g1);
 
 		// Check if path is attacked. 
-		return isBitboardAttacked(kingsPath, state, !state.isBlackMove());
+		return !isBitboardAttacked(kingsPath, state, !state.isBlackMove());
 	}
 
 	// Bad algorithm... prevent pinned pieces from moving
@@ -266,10 +266,7 @@ bool checkLegal(const State& state, Move move)
     {
 		auto diag = diagonals[fromSq];
         if ((moveKing & diag) && (oppBishops & diag))
-		{
             checkCheck = bool(diagonals[fromSq] & ~diagonals[toSq]);
-			std::cout << "diag checkCheck!" << std::endl;
-		}
     }
     if (!checkCheck) 
     {
