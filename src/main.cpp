@@ -38,10 +38,6 @@ int main()
     PrettyPrint(state);
 
     auto illegalMove = CreateMove(e3, f5);
-    //checkLegal(state, illegalMove);
-
-    state = StateFromFen("8/8/8/8/8/4p3/3K4/8 w - - 0 1");
-    isCheck(state, true);
-
+    checkLegal(state, illegalMove);
     return 0;
 }

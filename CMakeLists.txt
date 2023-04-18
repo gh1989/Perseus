@@ -15,9 +15,11 @@ set(SOURCES
     src/state.h
     src/move_generation.h
     src/random.h
+    src/network.h
     src/string_transforms.h
     src/types.h
     src/geometry.cpp
+    src/network.cpp
     src/move.cpp
     src/square.cpp
     src/state.cpp
