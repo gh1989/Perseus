@@ -1,33 +1,4 @@
-{
-    "editor.tokenColorCustomizations": {
-        "textMateRules": [
-            {
-                "scope": "googletest.failed",
-                "settings": {
-                    "foreground": "#f00"
-                }
-            },
-            {
-                "scope": "googletest.passed",
-                "settings": {
-                    "foreground": "#0f0"
-                }
-            },
-            {
-                "scope": "googletest.run",
-                "settings": {
-                    "foreground": "#0f0"
-                }
-            }
-        ]
-    },
-    "settings": {
-        "C_Cpp.default.includePath": [
-            "${workspaceFolder}/**",
-            "/opt/homebrew/include"
-        ]
-    },
-    "files.associations": {
+{ "files.associations": {
         "__bit_reference": "cpp",
         "__bits": "cpp",
         "__config": "cpp",

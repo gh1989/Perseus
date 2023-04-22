@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
+# Find the PyTorch package
+find_package(Torch REQUIRED)
+
 project(ChessEngine)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -32,10 +35,10 @@ add_executable(ChessEngine ${SOURCES} src/main.cpp)
 
 # Add the include directories
 target_include_directories(ChessEngine PUBLIC ${PROJECT_SOURCE_DIR}/src)
-
+target_link_libraries(ChessEngine ${TORCH_LIBRARIES})
 # Add Catch2
 find_package(Catch2 REQUIRED)
-include_directories(${CATCH2_INCLUDE_DIRS})
+include_directories(${CATCH2_INCLUDE_DIRS} ${TORCH_INCLUDE_DIRS})
 
 # Add tests executable
 set(TEST_SOURCES

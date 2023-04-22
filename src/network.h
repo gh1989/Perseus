@@ -1,42 +1,50 @@
-#pragma once
-#include <vector>
 
-class ChessNeuralNetwork {
+#include <torch/torch.h>
+#include <state.h>
+
+class ChessInputLayerImpl : public torch::nn::Module
+{
 public:
-    ChessNeuralNetwork();
+    ChessInputLayerImpl() {}
 
-    // Value network functions
-    float predict_value(std::vector<float>& input);
-    std::vector<float> get_value_gradient(std::vector<float>& input, float target);
-    void update_value_weights(std::vector<float>& gradient, float learning_rate);
+    torch::Tensor forward(const State& board)
+    {
+        // Define the shape of the tensor
+        const int nRows = 8;
+        const int nCols = 8;
+        const int nChannels = 18;
 
-    // Policy network functions
-    std::vector<float> predict_policy(std::vector<float>& input);
-    std::vector<float> get_policy_gradient(std::vector<float>& input, std::vector<float>& policy_target);
-    void update_policy_weights(std::vector<float>& gradient, float learning_rate);
+        // Create a tensor of zeros with the appropriate shape
+        auto inputTensor = torch::zeros({nChannels, nRows, nCols});
 
-private:
-    // Value network
-    std::vector<std::vector<float>> value_weights;
-    std::vector<float> value_bias1;
-    std::vector<float> value_hidden;
-    std::vector<float> value_hidden_grad;
-    float value_bias2;
-    std::vector<float> value_input_grad;
+        // Encode the piece positions
+        for(int i=0; i<13; i++)
+            for(auto j : BitboardRange(board.getBitboard(i)))
+            {
+                // File
+                int m = j % 8;
+                // Rank
+                int n = j / 8;
+                inputTensor[i][n][m] = 1;
+            }
 
-    // Policy network
-    std::vector<std::vector<float>> policy_weights;
-    std::vector<float> policy_bias1;
-    std::vector<float> policy_hidden;
-    std::vector<float> policy_hidden_grad;
-    std::vector<float> policy_hidden_grad_sum;
-    float policy_bias2;
+        // Encode the current player
+        if (!board.isBlackMove())
+            inputTensor[13].fill_(1);
 
-    // Input and output gradients for policy network
-    std::vector<float> policy_input_grad;
-    std::vector<float> policy_output_grad;
-    std::vector<float> policy_output;
+        // Encode the castling rights
+        if (board.getCastleRights() & Castling::BK)
+            inputTensor[14][0].fill_(1);
+        if (board.getCastleRights() & Castling::WK)
+            inputTensor[15][0].fill_(1);
+        if (board.getCastleRights() & Castling::BK)
+            inputTensor[16][7].fill_(1);
+        if (board.getCastleRights() & Castling::BQ)
+            inputTensor[17][7].fill_(1);
 
-    // Vector of binary values indicating whether each possible move is legal
-    std::vector<bool> legal_moves;
+        return inputTensor;
+    }
+
 };
+
+TORCH_MODULE(ChessInputLayer);

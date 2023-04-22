@@ -3,9 +3,12 @@
 #include <numeric>
 
 #include "network.h"
+#include "string_transforms.h"
 
 int main()
 {
-    ChessNeuralNetwork network;
+    ChessInputLayerImpl network;
+    State state = StateFromFen();
+    std::cout << network.forward(state);
     return 0;
 }
