@@ -1,10 +1,12 @@
 #include <catch2/catch_all.hpp>
+#include <torch/torch.h>
 #include <iostream>
 
 #include "../src/bitboard.h"
 #include "../src/state.h"
 #include "../src/string_transforms.h"
 #include "../src/move_generation.h"
+#include "../src/network.h"
 
 #define CATCH_CONFIG_MAIN
 

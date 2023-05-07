@@ -1,13 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
+project(ChessNetwork)
+set(CMAKE_CXX_STANDARD 23)
 # Find the PyTorch package
 find_package(Torch REQUIRED)
-
-project(ChessEngine)
-
-set(CMAKE_CXX_STANDARD 23)
-
-set(CMAKE_CXX_FLAGS "-g -O0")
 
 # Add the source files to your project
 set(SOURCES
@@ -17,6 +13,7 @@ set(SOURCES
     src/square.h
     src/state.h
     src/move_generation.h
+    src/py_chessnetwork.h
     src/random.h
     src/network.h
     src/string_transforms.h
@@ -24,18 +21,19 @@ set(SOURCES
     src/geometry.cpp
     src/network.cpp
     src/move.cpp
+    src/py_chessnetwork.cpp
     src/square.cpp
     src/state.cpp
     src/move_generation.cpp
     src/string_transforms.cpp
 )
 
-# Create the executable targets
-add_executable(ChessEngine ${SOURCES} src/main.cpp)
+# Create the shared library target
+add_library(ChessNetwork SHARED ${SOURCES})
 
-# Add the include directories
-target_include_directories(ChessEngine PUBLIC ${PROJECT_SOURCE_DIR}/src)
-target_link_libraries(ChessEngine ${TORCH_LIBRARIES})
+# Link the shared library to the PyTorch libraries
+target_link_libraries(ChessNetwork ${TORCH_LIBRARIES})
+
 # Add Catch2
 find_package(Catch2 REQUIRED)
 include_directories(${CATCH2_INCLUDE_DIRS} ${TORCH_INCLUDE_DIRS})
@@ -48,7 +46,7 @@ set(TEST_SOURCES
 )
 
 add_executable(tests ${SOURCES} ${TEST_SOURCES})
-target_link_libraries(tests Catch2::Catch2)
+target_link_libraries(tests Catch2::Catch2 ${TORCH_LIBRARIES})
 
 # Add a custom test target
 include(Catch)

@@ -58,6 +58,7 @@
         "sstream": "cpp",
         "cmath": "cpp",
         "list": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "vector": "cpp"
     }
 }
