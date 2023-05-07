@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RANDOM_H
+#define RANDOM_H
+
 static unsigned long x = 123456789, y = 362436069, z = 521288629;
 
 unsigned long xorshf96(void) {          //period 2^96-1
@@ -14,3 +16,5 @@ unsigned long xorshf96(void) {          //period 2^96-1
 
 	return z;
 }
+
+#endif

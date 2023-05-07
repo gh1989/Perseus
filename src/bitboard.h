@@ -1,4 +1,6 @@
-#pragma once
+#ifndef BITBOARD_H
+#define BITBOARD_H
+
 #include <iostream>
 #include <limits>
 #include <stdint.h>
@@ -110,3 +112,5 @@ public:
 private:
     Bitboard bb_;
 };
+
+#endif

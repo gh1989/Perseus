@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 
 #include <array>   
 #include "bitboard.h"
@@ -230,3 +231,5 @@ static const Bitboard antidiagonals[64] = {
 	0x0002040810204080ULL,  0x0004081020408000ULL,  0x0008102040800000ULL,  0x0010204080000000ULL,
 	0x0020408000000000ULL,  0x0040800000000000ULL,  0x0080000000000000ULL,  0x0000000000000000ULL,
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MOVE_GENERATION_H
+#define MOVE_GENERATION_H
 
 #include <list>
 
@@ -35,3 +36,5 @@ bool isCheck(const State& state, bool blackIsAttacking);
 bool isBitboardAttacked(const Bitboard& bitboard, const State& state, bool blackIsAttacking);
 
 bool checkLegal(const State& state, Move move);
+
+#endif

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef STATE_H
+#define STATE_H
+
 #include <numeric>
 #include "bitboard.h"
 #include "move.h"
@@ -122,3 +124,5 @@ private:
 };
 
 std::uint64_t hash_combine(uint64_t lhs, uint64_t rhs);
+
+#endif

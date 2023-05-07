@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TYPES_H
+#define TYPES_H
 
 enum Square
 {
@@ -15,3 +16,5 @@ enum Square
 enum Piece { KNIGHT, BISHOP, ROOK, QUEEN, KING, PAWN, NUMBER_PIECES, NO_PIECE = -1 };
 enum Castling { WQ = 1, WK = 2, BQ = 4, BK = 8, ALL = 15 };
 enum SpecialMove { NONE = 0, ENPASSANT = 1, CASTLE = 2, PROMOTE = 3 };
+
+#endif

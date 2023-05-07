@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MOVE_H
+#define MOVE_H
+
 #include "bitboard.h"
 #include "square.h"
 #include "types.h"
@@ -33,3 +35,5 @@ Move CreatePromotion(Square from, Square to, Piece promo);
 Move CreateEnPassant(Square from, Square to);
 // Create castle move
 Move CreateCastle(Square from, Square to);
+
+#endif

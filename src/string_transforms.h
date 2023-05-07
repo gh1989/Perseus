@@ -1,4 +1,6 @@
-#pragma once
+#ifndef STRING_TRANSFORMS_H
+#define STRING_TRANSFORMS_H
+
 #include <string>
 #include "bitboard.h"
 #include "move.h"
@@ -18,3 +20,5 @@ std::string AsUci(Move move);
 void PrettyPrint(const State& state);
 
 State StateFromFen(std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+#endif

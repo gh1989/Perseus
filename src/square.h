@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SQUARE_H
+#define SQUARE_H
+
 #include "bitboard.h"
 #include "geometry.h"
 #include "types.h"
@@ -86,3 +88,5 @@ static const std::map<unsigned long long, Square> square_lookup = {
 	{ 0x2000000000000000ULL, f8 },
 	{ 0x4000000000000000ULL, g8 },
 	{ 0x8000000000000000ULL, h8 } };
+
+#endif
