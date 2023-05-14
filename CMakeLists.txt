@@ -13,7 +13,6 @@ set(SOURCES
     src/square.h
     src/state.h
     src/move_generation.h
-    src/py_chessnetwork.h
     src/random.h
     src/network.h
     src/string_transforms.h
@@ -21,7 +20,6 @@ set(SOURCES
     src/geometry.cpp
     src/network.cpp
     src/move.cpp
-    src/py_chessnetwork.cpp
     src/square.cpp
     src/state.cpp
     src/move_generation.cpp
@@ -30,9 +28,6 @@ set(SOURCES
 
 # Create the shared library target
 add_library(ChessNetwork SHARED ${SOURCES})
-
-# Link the shared library to the PyTorch libraries
-target_link_libraries(ChessNetwork ${TORCH_LIBRARIES})
 
 # Add Catch2
 find_package(Catch2 REQUIRED)
