@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 3.0)
-
+cmake_policy(SET CMP0057 NEW)
 project(ChessNetwork)
 set(CMAKE_CXX_STANDARD 23)
+
+# Find Python
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
+
 # Find the PyTorch package
 find_package(Torch REQUIRED)
+
+# Find the pybind11 package
+find_package(pybind11 REQUIRED)
 
 # Add the source files to your project
 set(SOURCES
@@ -26,12 +33,18 @@ set(SOURCES
     src/string_transforms.cpp
 )
 
-# Create the shared library target
-add_library(ChessNetwork SHARED ${SOURCES})
+# Create the Python module
+pybind11_add_module(ChessNetwork MODULE ${SOURCES})
+
+# Add the necessary include directories
+target_include_directories(ChessNetwork PRIVATE ${PYTHON_INCLUDE_DIRS} ${TORCH_INCLUDE_DIRS})
+
+# Link the required libraries
+target_link_libraries(ChessNetwork PRIVATE ${TORCH_LIBRARIES})
 
 # Add Catch2
 find_package(Catch2 REQUIRED)
-include_directories(${CATCH2_INCLUDE_DIRS} ${TORCH_INCLUDE_DIRS})
+include_directories(${CATCH2_INCLUDE_DIRS})
 
 # Add tests executable
 set(TEST_SOURCES
