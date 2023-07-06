@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 3.0)
 cmake_policy(SET CMP0057 NEW)
 project(ChessNetwork)
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 
 # Find Python
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
-
+message("Python executable: ${PYTHON_EXECUTABLE}")
+ 
 # Find the PyTorch package
 find_package(Torch REQUIRED)
 
@@ -36,8 +38,22 @@ set(SOURCES
 # Create the Python module
 pybind11_add_module(ChessNetwork MODULE ${SOURCES})
 
+# Set the path to Python include directory
+set(PYTHON_INCLUDE_DIRS "/opt/homebrew/Cellar/python@3.11/3.11.4_1/Frameworks/Python.framework/Versions/3.11/include/python3.11")
+
+# Add the Python include directory to the include directories
+include_directories(${PYTHON_INCLUDE_DIRS})
+
 # Add the necessary include directories
+#execute_process(
+#    COMMAND python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())"
+#    OUTPUT_VARIABLE PYTHON_INCLUDE_DIRS
+#    OUTPUT_STRIP_TRAILING_WHITESPACE
+#)
+
 target_include_directories(ChessNetwork PRIVATE ${PYTHON_INCLUDE_DIRS} ${TORCH_INCLUDE_DIRS})
+message("PYTHON_INCLUDE_DIRS: ${PYTHON_INCLUDE_DIRS}")
+message("TORCH_INCLUDE_DIRS: ${TORCH_INCLUDE_DIRS}")
 
 # Link the required libraries
 target_link_libraries(ChessNetwork PRIVATE ${TORCH_LIBRARIES})
