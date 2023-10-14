@@ -1,7 +1,5 @@
-#pragma once
 #include "state.h"
 #include <functional>
-
 
 template<class Iter, class T>
 Iter binary_find(Iter begin, Iter end, T val) {

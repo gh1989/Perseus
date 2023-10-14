@@ -1,7 +1,6 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include <pybind11/pybind11.h>
 #include <torch/torch.h>
 #include <torch/nn/functional.h>
 
@@ -104,14 +103,5 @@ public:
         return std::make_tuple(v, p);
     }
 };
-
-namespace py = pybind11;
-
-PYBIND11_MODULE(chess_network, m)
-{
-    py::class_<ChessNetworkImpl>(m, "ChessNetwork")
-        .def(py::init<>())
-        .def("forward", &ChessNetworkImpl::forward);
-}
 
 #endif
