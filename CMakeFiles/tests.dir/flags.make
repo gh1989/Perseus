@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/clang++
 CXX_DEFINES = -DPROTOBUF_USE_DLLS -DUSE_C10D_GLOO -DUSE_DISTRIBUTED -DUSE_RPC -DUSE_TENSORPIPE
 
-CXX_INCLUDES = -isystem /opt/homebrew/include/torch/csrc/api/include -isystem /opt/homebrew/include
+CXX_INCLUDES = -isystem /opt/homebrew/include -isystem /opt/homebrew/include/torch/csrc/api/include
 
 CXX_FLAGSarm64 = -std=gnu++2b -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -mmacosx-version-min=13.0
 

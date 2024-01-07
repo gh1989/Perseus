@@ -1,4 +1,6 @@
+#include "network.h"
 int main()
 {
-return 0;
+    ChessNetworkImpl impl;
+    return 0;
 };

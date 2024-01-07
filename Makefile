@@ -60,7 +60,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /Users/gregg/code/Perseus
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/gregg/code/Perseus
+CMAKE_BINARY_DIR = /Users/gregg/Code/Perseus
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gregg/code/Perseus/CMakeFiles /Users/gregg/code/Perseus//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gregg/Code/Perseus/CMakeFiles /Users/gregg/Code/Perseus//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gregg/code/Perseus/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/gregg/Code/Perseus/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -175,7 +175,6 @@ src/main.o: src/main.cpp.o
 # target to build an object file
 src/main.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/perseus.dir/build.make CMakeFiles/perseus.dir/src/main.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tests.dir/build.make CMakeFiles/tests.dir/src/main.cpp.o
 .PHONY : src/main.cpp.o
 
 src/main.i: src/main.cpp.i
@@ -184,7 +183,6 @@ src/main.i: src/main.cpp.i
 # target to preprocess a source file
 src/main.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/perseus.dir/build.make CMakeFiles/perseus.dir/src/main.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tests.dir/build.make CMakeFiles/tests.dir/src/main.cpp.i
 .PHONY : src/main.cpp.i
 
 src/main.s: src/main.cpp.s
@@ -193,7 +191,6 @@ src/main.s: src/main.cpp.s
 # target to generate assembly for a file
 src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/perseus.dir/build.make CMakeFiles/perseus.dir/src/main.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tests.dir/build.make CMakeFiles/tests.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
 src/move.o: src/move.cpp.o

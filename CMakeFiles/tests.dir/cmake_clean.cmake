@@ -1,8 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/tests.dir/src/geometry.cpp.o"
   "CMakeFiles/tests.dir/src/geometry.cpp.o.d"
-  "CMakeFiles/tests.dir/src/main.cpp.o"
-  "CMakeFiles/tests.dir/src/main.cpp.o.d"
   "CMakeFiles/tests.dir/src/move.cpp.o"
   "CMakeFiles/tests.dir/src/move.cpp.o.d"
   "CMakeFiles/tests.dir/src/move_generation.cpp.o"

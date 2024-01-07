@@ -56,7 +56,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /Users/gregg/code/Perseus
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/gregg/code/Perseus
+CMAKE_BINARY_DIR = /Users/gregg/Code/Perseus
 
 # Include any dependencies generated for this target.
 include CMakeFiles/tests.dir/depend.make
@@ -69,24 +69,24 @@ include CMakeFiles/tests.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/tests.dir/flags.make
 
-CMakeFiles/tests.dir/src/main.cpp.o: CMakeFiles/tests.dir/flags.make
-CMakeFiles/tests.dir/src/main.cpp.o: src/main.cpp
-CMakeFiles/tests.dir/src/main.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/tests.dir/src/main.cpp.o"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/main.cpp.o -MF CMakeFiles/tests.dir/src/main.cpp.o.d -o CMakeFiles/tests.dir/src/main.cpp.o -c /Users/gregg/code/Perseus/src/main.cpp
+CMakeFiles/tests.dir/tests/test_all.cpp.o: CMakeFiles/tests.dir/flags.make
+CMakeFiles/tests.dir/tests/test_all.cpp.o: tests/test_all.cpp
+CMakeFiles/tests.dir/tests/test_all.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/tests.dir/tests/test_all.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/tests/test_all.cpp.o -MF CMakeFiles/tests.dir/tests/test_all.cpp.o.d -o CMakeFiles/tests.dir/tests/test_all.cpp.o -c /Users/gregg/code/Perseus/tests/test_all.cpp
 
-CMakeFiles/tests.dir/src/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/tests.dir/src/main.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/gregg/code/Perseus/src/main.cpp > CMakeFiles/tests.dir/src/main.cpp.i
+CMakeFiles/tests.dir/tests/test_all.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/tests.dir/tests/test_all.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/gregg/code/Perseus/tests/test_all.cpp > CMakeFiles/tests.dir/tests/test_all.cpp.i
 
-CMakeFiles/tests.dir/src/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/tests.dir/src/main.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gregg/code/Perseus/src/main.cpp -o CMakeFiles/tests.dir/src/main.cpp.s
+CMakeFiles/tests.dir/tests/test_all.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/tests.dir/tests/test_all.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gregg/code/Perseus/tests/test_all.cpp -o CMakeFiles/tests.dir/tests/test_all.cpp.s
 
 CMakeFiles/tests.dir/src/geometry.cpp.o: CMakeFiles/tests.dir/flags.make
 CMakeFiles/tests.dir/src/geometry.cpp.o: src/geometry.cpp
 CMakeFiles/tests.dir/src/geometry.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/tests.dir/src/geometry.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/tests.dir/src/geometry.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/geometry.cpp.o -MF CMakeFiles/tests.dir/src/geometry.cpp.o.d -o CMakeFiles/tests.dir/src/geometry.cpp.o -c /Users/gregg/code/Perseus/src/geometry.cpp
 
 CMakeFiles/tests.dir/src/geometry.cpp.i: cmake_force
@@ -100,7 +100,7 @@ CMakeFiles/tests.dir/src/geometry.cpp.s: cmake_force
 CMakeFiles/tests.dir/src/network.cpp.o: CMakeFiles/tests.dir/flags.make
 CMakeFiles/tests.dir/src/network.cpp.o: src/network.cpp
 CMakeFiles/tests.dir/src/network.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/tests.dir/src/network.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/tests.dir/src/network.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/network.cpp.o -MF CMakeFiles/tests.dir/src/network.cpp.o.d -o CMakeFiles/tests.dir/src/network.cpp.o -c /Users/gregg/code/Perseus/src/network.cpp
 
 CMakeFiles/tests.dir/src/network.cpp.i: cmake_force
@@ -114,7 +114,7 @@ CMakeFiles/tests.dir/src/network.cpp.s: cmake_force
 CMakeFiles/tests.dir/src/move.cpp.o: CMakeFiles/tests.dir/flags.make
 CMakeFiles/tests.dir/src/move.cpp.o: src/move.cpp
 CMakeFiles/tests.dir/src/move.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/tests.dir/src/move.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/tests.dir/src/move.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/move.cpp.o -MF CMakeFiles/tests.dir/src/move.cpp.o.d -o CMakeFiles/tests.dir/src/move.cpp.o -c /Users/gregg/code/Perseus/src/move.cpp
 
 CMakeFiles/tests.dir/src/move.cpp.i: cmake_force
@@ -128,7 +128,7 @@ CMakeFiles/tests.dir/src/move.cpp.s: cmake_force
 CMakeFiles/tests.dir/src/square.cpp.o: CMakeFiles/tests.dir/flags.make
 CMakeFiles/tests.dir/src/square.cpp.o: src/square.cpp
 CMakeFiles/tests.dir/src/square.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/tests.dir/src/square.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/tests.dir/src/square.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/square.cpp.o -MF CMakeFiles/tests.dir/src/square.cpp.o.d -o CMakeFiles/tests.dir/src/square.cpp.o -c /Users/gregg/code/Perseus/src/square.cpp
 
 CMakeFiles/tests.dir/src/square.cpp.i: cmake_force
@@ -142,7 +142,7 @@ CMakeFiles/tests.dir/src/square.cpp.s: cmake_force
 CMakeFiles/tests.dir/src/state.cpp.o: CMakeFiles/tests.dir/flags.make
 CMakeFiles/tests.dir/src/state.cpp.o: src/state.cpp
 CMakeFiles/tests.dir/src/state.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/tests.dir/src/state.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/tests.dir/src/state.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/state.cpp.o -MF CMakeFiles/tests.dir/src/state.cpp.o.d -o CMakeFiles/tests.dir/src/state.cpp.o -c /Users/gregg/code/Perseus/src/state.cpp
 
 CMakeFiles/tests.dir/src/state.cpp.i: cmake_force
@@ -156,7 +156,7 @@ CMakeFiles/tests.dir/src/state.cpp.s: cmake_force
 CMakeFiles/tests.dir/src/move_generation.cpp.o: CMakeFiles/tests.dir/flags.make
 CMakeFiles/tests.dir/src/move_generation.cpp.o: src/move_generation.cpp
 CMakeFiles/tests.dir/src/move_generation.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/tests.dir/src/move_generation.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/tests.dir/src/move_generation.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/move_generation.cpp.o -MF CMakeFiles/tests.dir/src/move_generation.cpp.o.d -o CMakeFiles/tests.dir/src/move_generation.cpp.o -c /Users/gregg/code/Perseus/src/move_generation.cpp
 
 CMakeFiles/tests.dir/src/move_generation.cpp.i: cmake_force
@@ -170,7 +170,7 @@ CMakeFiles/tests.dir/src/move_generation.cpp.s: cmake_force
 CMakeFiles/tests.dir/src/string_transforms.cpp.o: CMakeFiles/tests.dir/flags.make
 CMakeFiles/tests.dir/src/string_transforms.cpp.o: src/string_transforms.cpp
 CMakeFiles/tests.dir/src/string_transforms.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/tests.dir/src/string_transforms.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/tests.dir/src/string_transforms.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/src/string_transforms.cpp.o -MF CMakeFiles/tests.dir/src/string_transforms.cpp.o.d -o CMakeFiles/tests.dir/src/string_transforms.cpp.o -c /Users/gregg/code/Perseus/src/string_transforms.cpp
 
 CMakeFiles/tests.dir/src/string_transforms.cpp.i: cmake_force
@@ -181,36 +181,21 @@ CMakeFiles/tests.dir/src/string_transforms.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/tests.dir/src/string_transforms.cpp.s"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gregg/code/Perseus/src/string_transforms.cpp -o CMakeFiles/tests.dir/src/string_transforms.cpp.s
 
-CMakeFiles/tests.dir/tests/test_all.cpp.o: CMakeFiles/tests.dir/flags.make
-CMakeFiles/tests.dir/tests/test_all.cpp.o: tests/test_all.cpp
-CMakeFiles/tests.dir/tests/test_all.cpp.o: CMakeFiles/tests.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/tests.dir/tests/test_all.cpp.o"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/tests.dir/tests/test_all.cpp.o -MF CMakeFiles/tests.dir/tests/test_all.cpp.o.d -o CMakeFiles/tests.dir/tests/test_all.cpp.o -c /Users/gregg/code/Perseus/tests/test_all.cpp
-
-CMakeFiles/tests.dir/tests/test_all.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/tests.dir/tests/test_all.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/gregg/code/Perseus/tests/test_all.cpp > CMakeFiles/tests.dir/tests/test_all.cpp.i
-
-CMakeFiles/tests.dir/tests/test_all.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/tests.dir/tests/test_all.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/gregg/code/Perseus/tests/test_all.cpp -o CMakeFiles/tests.dir/tests/test_all.cpp.s
-
 # Object files for target tests
 tests_OBJECTS = \
-"CMakeFiles/tests.dir/src/main.cpp.o" \
+"CMakeFiles/tests.dir/tests/test_all.cpp.o" \
 "CMakeFiles/tests.dir/src/geometry.cpp.o" \
 "CMakeFiles/tests.dir/src/network.cpp.o" \
 "CMakeFiles/tests.dir/src/move.cpp.o" \
 "CMakeFiles/tests.dir/src/square.cpp.o" \
 "CMakeFiles/tests.dir/src/state.cpp.o" \
 "CMakeFiles/tests.dir/src/move_generation.cpp.o" \
-"CMakeFiles/tests.dir/src/string_transforms.cpp.o" \
-"CMakeFiles/tests.dir/tests/test_all.cpp.o"
+"CMakeFiles/tests.dir/src/string_transforms.cpp.o"
 
 # External object files for target tests
 tests_EXTERNAL_OBJECTS =
 
-tests: CMakeFiles/tests.dir/src/main.cpp.o
+tests: CMakeFiles/tests.dir/tests/test_all.cpp.o
 tests: CMakeFiles/tests.dir/src/geometry.cpp.o
 tests: CMakeFiles/tests.dir/src/network.cpp.o
 tests: CMakeFiles/tests.dir/src/move.cpp.o
@@ -218,19 +203,84 @@ tests: CMakeFiles/tests.dir/src/square.cpp.o
 tests: CMakeFiles/tests.dir/src/state.cpp.o
 tests: CMakeFiles/tests.dir/src/move_generation.cpp.o
 tests: CMakeFiles/tests.dir/src/string_transforms.cpp.o
-tests: CMakeFiles/tests.dir/tests/test_all.cpp.o
 tests: CMakeFiles/tests.dir/build.make
 tests: /opt/homebrew/lib/libCatch2.a
 tests: /opt/homebrew/lib/libc10.dylib
 tests: /opt/homebrew/lib/libkineto.a
+tests: kineto/libkineto/build/libkineto.a
 tests: /opt/homebrew/lib/libtorch.dylib
 tests: /opt/homebrew/lib/libtorch_cpu.dylib
-tests: /opt/homebrew/lib/libprotobuf.3.21.12.0.dylib
+tests: /opt/homebrew/lib/libprotobuf.25.1.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_check_op.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_leak_check.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_die_if_null.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_conditions.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_message.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_nullguard.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_examine_stack.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_format.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_proto.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_log_sink_set.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_sink.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_entry.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_marshalling.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_reflection.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_config.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_program_name.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_private_handle_accessor.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_commandlineflag.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_flags_commandlineflag_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_initialize.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_globals.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_internal_globals.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_raw_hash_set.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_hash.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_city.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_low_level_hash.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_hashtablez_sampler.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_statusor.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_status.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_cord.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_cordz_info.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_cord_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_cordz_functions.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_exponential_biased.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_cordz_handle.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_crc_cord_state.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_crc32c.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_crc_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_crc_cpu_detect.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_bad_optional_access.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_str_format_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_strerror.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_synchronization.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_stacktrace.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_symbolize.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_debugging_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_demangle_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_graphcycles_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_kernel_timeout_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_malloc_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_time.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_strings.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_string_view.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_throw_delegate.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_strings_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_base.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_spinlock_wait.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_int128.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_civil_time.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_time_zone.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_bad_variant_access.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_raw_logging_internal.2308.0.0.dylib
+tests: /opt/homebrew/lib/libabsl_log_severity.2308.0.0.dylib
 tests: /opt/homebrew/lib/libc10.dylib
 tests: CMakeFiles/tests.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/gregg/code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/gregg/Code/Perseus/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable tests"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/tests.dir/link.txt --verbose=$(VERBOSE)
-	/opt/homebrew/Cellar/cmake/3.26.3/bin/cmake -D TEST_TARGET=tests -D TEST_EXECUTABLE=/Users/gregg/code/Perseus/tests -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/Users/gregg/code/Perseus -D TEST_SPEC= -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_LIST=tests_TESTS -D TEST_REPORTER= -D TEST_OUTPUT_DIR= -D TEST_OUTPUT_PREFIX= -D TEST_OUTPUT_SUFFIX= -D TEST_DL_PATHS= -D CTEST_FILE=/Users/gregg/code/Perseus/tests_tests-b12d07c.cmake -P /opt/homebrew/lib/cmake/Catch2/CatchAddTests.cmake
+	/opt/homebrew/Cellar/cmake/3.26.3/bin/cmake -D TEST_TARGET=tests -D TEST_EXECUTABLE=/Users/gregg/Code/Perseus/tests -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/Users/gregg/Code/Perseus -D TEST_SPEC= -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_LIST=tests_TESTS -D TEST_REPORTER= -D TEST_OUTPUT_DIR= -D TEST_OUTPUT_PREFIX= -D TEST_OUTPUT_SUFFIX= -D TEST_DL_PATHS= -D CTEST_FILE=/Users/gregg/Code/Perseus/tests_tests-b12d07c.cmake -P /opt/homebrew/lib/cmake/Catch2/CatchAddTests.cmake
 
 # Rule to build all files generated by this target.
 CMakeFiles/tests.dir/build: tests
@@ -241,6 +291,6 @@ CMakeFiles/tests.dir/clean:
 .PHONY : CMakeFiles/tests.dir/clean
 
 CMakeFiles/tests.dir/depend:
-	cd /Users/gregg/code/Perseus && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/gregg/code/Perseus /Users/gregg/code/Perseus /Users/gregg/code/Perseus /Users/gregg/code/Perseus /Users/gregg/code/Perseus/CMakeFiles/tests.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/gregg/Code/Perseus && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/gregg/code/Perseus /Users/gregg/code/Perseus /Users/gregg/Code/Perseus /Users/gregg/Code/Perseus /Users/gregg/Code/Perseus/CMakeFiles/tests.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/tests.dir/depend
 

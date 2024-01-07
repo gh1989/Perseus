@@ -9,7 +9,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/gregg/code/Perseus/src/geometry.cpp" "CMakeFiles/tests.dir/src/geometry.cpp.o" "gcc" "CMakeFiles/tests.dir/src/geometry.cpp.o.d"
-  "/Users/gregg/code/Perseus/src/main.cpp" "CMakeFiles/tests.dir/src/main.cpp.o" "gcc" "CMakeFiles/tests.dir/src/main.cpp.o.d"
   "/Users/gregg/code/Perseus/src/move.cpp" "CMakeFiles/tests.dir/src/move.cpp.o" "gcc" "CMakeFiles/tests.dir/src/move.cpp.o.d"
   "/Users/gregg/code/Perseus/src/move_generation.cpp" "CMakeFiles/tests.dir/src/move_generation.cpp.o" "gcc" "CMakeFiles/tests.dir/src/move_generation.cpp.o.d"
   "/Users/gregg/code/Perseus/src/network.cpp" "CMakeFiles/tests.dir/src/network.cpp.o" "gcc" "CMakeFiles/tests.dir/src/network.cpp.o.d"
