@@ -21,7 +21,6 @@ set(SOURCES
     src/string_transforms.h
     src/types.h
     src/geometry.cpp
-    src/network.cpp
     src/move.cpp
     src/square.cpp
     src/state.cpp
@@ -29,10 +28,10 @@ set(SOURCES
     src/string_transforms.cpp
 )
 
-set(LIBKINETO_PATH "/Users/gregg/Code/Perseus/kineto/libkineto/build/libkineto.a") 
+#set(LIBKINETO_PATH "/Users/gregg/Code/Perseus/kineto/libkineto/build/libkineto.a") 
 
 add_executable(perseus src/main.cpp ${SOURCES})
-target_link_libraries(perseus PRIVATE ${TORCH_LIBRARIES} ${LIBKINETO_PATH})
+target_link_libraries(perseus PRIVATE ${TORCH_LIBRARIES}) # ${LIBKINETO_PATH})
 
 # Add Catch2
 find_package(Catch2 REQUIRED)
@@ -44,7 +43,7 @@ set(TEST_SOURCES
 )
 
 add_executable(tests ${TEST_SOURCES} ${SOURCES})
-target_link_libraries(tests PRIVATE Catch2::Catch2 ${TORCH_LIBRARIES} ${LIBKINETO_PATH})
+target_link_libraries(tests PRIVATE Catch2::Catch2 ${TORCH_LIBRARIES}) # ${LIBKINETO_PATH})
 
 # Add a custom test target
 include(Catch)

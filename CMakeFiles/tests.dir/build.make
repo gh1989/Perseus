@@ -207,7 +207,6 @@ tests: CMakeFiles/tests.dir/build.make
 tests: /opt/homebrew/lib/libCatch2.a
 tests: /opt/homebrew/lib/libc10.dylib
 tests: /opt/homebrew/lib/libkineto.a
-tests: kineto/libkineto/build/libkineto.a
 tests: /opt/homebrew/lib/libtorch.dylib
 tests: /opt/homebrew/lib/libtorch_cpu.dylib
 tests: /opt/homebrew/lib/libprotobuf.25.1.0.dylib

@@ -206,7 +206,6 @@ perseus: CMakeFiles/perseus.dir/src/string_transforms.cpp.o
 perseus: CMakeFiles/perseus.dir/build.make
 perseus: /opt/homebrew/lib/libc10.dylib
 perseus: /opt/homebrew/lib/libkineto.a
-perseus: kineto/libkineto/build/libkineto.a
 perseus: /opt/homebrew/lib/libtorch.dylib
 perseus: /opt/homebrew/lib/libtorch_cpu.dylib
 perseus: /opt/homebrew/lib/libprotobuf.25.1.0.dylib
