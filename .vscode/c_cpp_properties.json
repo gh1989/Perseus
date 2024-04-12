@@ -4,8 +4,9 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/homebrew/include/",
-                "/opt/homebrew/include/torch/csrc/api/include",
+                "/opt/homebrew/include/**",
+                "/opt/homebrew/include/torch/csrc/api/include/**",
+                "/opt/homebrew/Cellar/pytorch/2.1.2/libexec/lib/python3.11/site-packages/torch/include/torch/csrc/api/include"
             ],
             "defines": [],
             "macFrameworkPath": [
