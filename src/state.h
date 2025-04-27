@@ -123,6 +123,4 @@ private:
 	}
 };
 
-std::uint64_t hash_combine(uint64_t lhs, uint64_t rhs);
-
 #endif

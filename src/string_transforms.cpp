@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <unordered_map>
 #include "move.h"
 #include "state.h"
 #include "string_transforms.h"
@@ -162,14 +163,15 @@ State StateFromFen(std::string fen)
 
 			bool _whitePiece = !std::islower(c);
 			auto C = std::toupper(c);
-			Piece pieceLookup[256] = {
-    			['P'] = PAWN,
-    			['N'] = KNIGHT,
-   				['B'] = BISHOP,
-   				['R'] = ROOK,
-   				['Q'] = QUEEN,
-    			['K'] = KING
+			std::unordered_map<char, Piece> pieceLookup = {
+    			{'P', PAWN},
+    			{'N', KNIGHT},
+    			{'B', BISHOP},
+    			{'R', ROOK},
+    			{'Q', QUEEN},
+    			{'K', KING}
 			};
+
 			Piece _piece = pieceLookup[C]; 
 			state.addToBitboard(!_whitePiece*NUMBER_PIECES+_piece, square );
 		}

@@ -1,4 +1,0 @@
-/Users/gregg/Code/Perseus/CMakeFiles/perseus.dir
-/Users/gregg/Code/Perseus/CMakeFiles/tests.dir
-/Users/gregg/Code/Perseus/CMakeFiles/edit_cache.dir
-/Users/gregg/Code/Perseus/CMakeFiles/rebuild_cache.dir

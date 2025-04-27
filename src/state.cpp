@@ -99,10 +99,3 @@ void State::Apply(Move move) {
 	blackMove = other;
 	plies++;
 }
-
-
-std::uint64_t hash_combine(uint64_t lhs, uint64_t rhs)
-{
-	lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
-	return lhs;
-}
